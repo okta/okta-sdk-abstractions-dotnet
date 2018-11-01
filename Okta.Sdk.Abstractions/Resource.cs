@@ -28,14 +28,14 @@ namespace Okta.Sdk.Abstractions
             Initialize(null, null, null, null);
         }
 
-        internal void Initialize(
+        public void Initialize(
             IBaseOktaClient client,
             ResourceFactory resourceFactory,
             IDictionary<string, object> data,
             ILogger logger)
         {
             _client = client;
-            _resourceFactory = resourceFactory ?? new ResourceFactory(client, logger);
+            _resourceFactory = resourceFactory ?? new ResourceFactory(client, logger, new DefaultResourceTypeResolverFactory());
             _data = data ?? _resourceFactory.NewDictionary(null);
             _logger = logger ?? NullLogger.Instance;
         }

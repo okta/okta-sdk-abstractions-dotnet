@@ -6,7 +6,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Okta.Sdk.Abstractions
+namespace Okta.Sdk.Abstractions.Internal
 {
     /// <summary>
     /// Resolves a resource type based on the resource data. Base class for all resource type resolvers.
@@ -14,6 +14,29 @@ namespace Okta.Sdk.Abstractions
     /// <typeparam name="T">The base type of resource to resolve.</typeparam>
     public abstract class AbstractResourceTypeResolver<T> : IResourceTypeResolver
     {
+        protected AbstractResourceTypeResolverFactory _resourceTypeResolverFactory;
+
+        public abstract AbstractResourceTypeResolverFactory ResourceTypeResolverFactory
+        {
+            set;
+            get;
+        }
+
+        //public AbstractResourceTypeResolverFactory ResourceTypeResolverFactory
+        //{
+        //    set { this._resourceTypeResolverFactory = value; }
+
+        //    get
+        //    {
+        //        if (_resourceTypeResolverFactory == null)
+        //        {
+        //            _resourceTypeResolverFactory = new DefaultResourceTypeResolverFactory();
+        //        }
+
+        //        return _resourceTypeResolverFactory;
+        //    }
+        //}
+
         /// <summary>
         /// Get the resolved resource type given its <paramref name="data"/>.
         /// </summary>

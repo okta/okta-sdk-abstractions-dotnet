@@ -18,7 +18,7 @@ namespace Okta.Sdk.Abstractions.UnitTests.Internal
 
         public TestableOktaClient(IRequestExecutor requestExecutor)
             : base(
-                new DefaultDataStore(requestExecutor, new DefaultSerializer(), new ResourceFactory(null, null), NullLogger.Instance),
+                new DefaultDataStore(requestExecutor, new DefaultSerializer(), new ResourceFactory(null, null, null), NullLogger.Instance),
                 DefaultFakeConfiguration,
                 new RequestContext())
         {

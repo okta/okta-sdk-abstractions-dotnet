@@ -33,7 +33,7 @@ namespace Okta.Sdk.Abstractions.UnitTests
                 },
             };
 
-            var factory = new ResourceFactory(null, null);
+            var factory = new ResourceFactory(null, null, null);
             var resource = factory.CreateNew<TestNestedResource>(data);
 
             resource.Should().NotBeNull();
@@ -58,7 +58,7 @@ namespace Okta.Sdk.Abstractions.UnitTests
                     ["Bar"] = false,
                 },
             };
-            var factory = new ResourceFactory(null, null);
+            var factory = new ResourceFactory(null, null, null);
             var resource = factory.CreateNew<TestNestedResource>(data);
 
             resource.Nested.Bar = true;

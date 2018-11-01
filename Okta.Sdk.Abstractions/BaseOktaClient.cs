@@ -18,8 +18,8 @@ namespace Okta.Sdk.Abstractions
 {
     public class BaseOktaClient : IBaseOktaClient
     {
-        protected readonly IDataStore _dataStore;
-        protected readonly RequestContext _requestContext;
+        protected IDataStore _dataStore;
+        protected RequestContext _requestContext;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BaseOktaClient"/> class.
@@ -42,7 +42,7 @@ namespace Okta.Sdk.Abstractions
                 logger);
 
             var requestExecutor = new DefaultRequestExecutor(Configuration, defaultClient, logger);
-            var resourceFactory = new ResourceFactory(this, logger);
+            var resourceFactory = new ResourceFactory(this, logger, new DefaultResourceTypeResolverFactory());
             _dataStore = new DefaultDataStore(
                 requestExecutor,
                 new DefaultSerializer(),
@@ -67,7 +67,7 @@ namespace Okta.Sdk.Abstractions
             logger = logger ?? NullLogger.Instance;
 
             var requestExecutor = new DefaultRequestExecutor(Configuration, httpClient, logger);
-            var resourceFactory = new ResourceFactory(this, logger);
+            var resourceFactory = new ResourceFactory(this, logger, new DefaultResourceTypeResolverFactory());
             _dataStore = new DefaultDataStore(
                 requestExecutor,
                 new DefaultSerializer(),
@@ -89,7 +89,7 @@ namespace Okta.Sdk.Abstractions
             _requestContext = requestContext;
         }
 
-        private static OktaClientConfiguration GetConfigurationOrDefault(OktaClientConfiguration apiClientConfiguration = null)
+        protected static OktaClientConfiguration GetConfigurationOrDefault(OktaClientConfiguration apiClientConfiguration = null)
         {
             string configurationFileRoot = Directory.GetCurrentDirectory();
 
@@ -116,7 +116,7 @@ namespace Okta.Sdk.Abstractions
         }
 
         /// <inheritdoc/>
-        public OktaClientConfiguration Configuration { get; }
+        public OktaClientConfiguration Configuration { get; protected set; }
 
         /// <inheritdoc/>
         public IBaseOktaClient CreatedScoped(RequestContext requestContext)

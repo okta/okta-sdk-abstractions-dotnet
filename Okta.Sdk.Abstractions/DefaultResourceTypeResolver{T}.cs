@@ -11,7 +11,23 @@ namespace Okta.Sdk.Abstractions
 {
     internal sealed class DefaultResourceTypeResolver<T> : AbstractResourceTypeResolver<T>
     {
+        public override AbstractResourceTypeResolverFactory ResourceTypeResolverFactory
+        {
+            set { this._resourceTypeResolverFactory = value; }
+
+            get
+            {
+                if (_resourceTypeResolverFactory == null)
+                {
+                    _resourceTypeResolverFactory = new DefaultResourceTypeResolverFactory();
+                }
+
+                return _resourceTypeResolverFactory;
+            }
+        }
+
         protected override Type GetResolvedTypeInternal(IDictionary<string, object> data)
             => typeof(T);
+
     }
 }

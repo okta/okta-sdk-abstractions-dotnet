@@ -18,17 +18,20 @@ namespace Okta.Sdk.Abstractions
     {
         private readonly IBaseOktaClient _client;
         private readonly ILogger _logger;
+        private readonly AbstractResourceTypeResolverFactory _resourceTypeResolverFactory;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ResourceFactory"/> class.
         /// </summary>
         /// <param name="client">The client.</param>
         /// <param name="logger">The logging interface.</param>
-        public ResourceFactory(IBaseOktaClient client, ILogger logger)
+        public ResourceFactory(IBaseOktaClient client, ILogger logger, AbstractResourceTypeResolverFactory resourceTypeResolverFactory)
         {
             _client = client;
             _logger = logger;
+            _resourceTypeResolverFactory = resourceTypeResolverFactory ?? new DefaultResourceTypeResolverFactory();
         }
+
 
         /// <summary>
         /// Creates a new dictionary with the specified behavior.
@@ -55,12 +58,13 @@ namespace Okta.Sdk.Abstractions
                 throw new InvalidOperationException("Resources must inherit from the Resource class.");
             }
 
-            var typeResolver = ResourceTypeResolverFactory.CreateResolver<T>();
+            var typeResolver = _resourceTypeResolverFactory.CreateResolver<T>();
             var resourceType = typeResolver.GetResolvedType(existingDictionary);
 
             var resource = Activator.CreateInstance(resourceType) as Resource;
 
             resource.Initialize(_client, this, existingDictionary, _logger);
+
             return (T)(object)resource;
         }
 
@@ -77,7 +81,7 @@ namespace Okta.Sdk.Abstractions
                 throw new InvalidOperationException("Resources must inherit from the Resource class.");
             }
 
-            var typeResolver = ResourceTypeResolverFactory.CreateResolver<T>();
+            var typeResolver = _resourceTypeResolverFactory.CreateResolver<T>();
             var resourceType = typeResolver.GetResolvedType(data);
 
             var resource = Activator.CreateInstance(resourceType) as Resource;
