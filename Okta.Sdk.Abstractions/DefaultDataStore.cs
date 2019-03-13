@@ -170,7 +170,7 @@ namespace Okta.Sdk.Abstractions
             HttpRequest request,
             RequestContext requestContext,
             CancellationToken cancellationToken)
-            where T : Resource, new()
+            where T : BaseResource, new()
         {
             PrepareRequest(request, requestContext);
 
@@ -201,7 +201,7 @@ namespace Okta.Sdk.Abstractions
 
         /// <inheritdoc/>
         public async Task<HttpResponse<TResponse>> PostAsync<TResponse>(HttpRequest request, RequestContext requestContext, CancellationToken cancellationToken)
-            where TResponse : Resource, new()
+            where TResponse : BaseResource, new()
         {
             PrepareRequest(request, requestContext);
 
@@ -218,7 +218,7 @@ namespace Okta.Sdk.Abstractions
 
         /// <inheritdoc/>
         public async Task<HttpResponse<TResponse>> PutAsync<TResponse>(HttpRequest request, RequestContext requestContext, CancellationToken cancellationToken)
-            where TResponse : Resource, new()
+            where TResponse : BaseResource, new()
         {
             PrepareRequest(request, requestContext);
 

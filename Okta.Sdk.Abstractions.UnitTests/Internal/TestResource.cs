@@ -8,7 +8,7 @@ namespace Okta.Sdk.Abstractions.UnitTests.Internal
     /// <summary>
     /// Dummy resource that is used for unit tests that involve serialization/deserialization.
     /// </summary>
-    public class TestResource : Resource
+    public class TestResource : BaseResource
     {
         public TestResource()
             : base()

@@ -8,13 +8,13 @@ using System.Collections.Generic;
 namespace Okta.Sdk.Abstractions
 {
     /// <summary>
-    /// A collection of <see cref="Resource">Resources</see> that can be enumerated asynchronously.
+    /// A collection of <see cref="BaseResource">Resources</see> that can be enumerated asynchronously.
     /// </summary>
     /// <remarks>
     /// Using this object with LINQ will automatically enumerate a paginated Okta collection.
     /// See <a href="https://developer.okta.com/docs/api/getting_started/design_principles.html#pagination">the API documentation on pagination</a>.
     /// </remarks>
-    /// <typeparam name="T">The <see cref="Resource"/> type in the collection.</typeparam>
+    /// <typeparam name="T">The <see cref="BaseResource"/> type in the collection.</typeparam>
     public interface ICollectionClient<T> : IAsyncEnumerable<T>
         where T : IResource
     {

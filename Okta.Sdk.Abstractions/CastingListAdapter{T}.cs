@@ -39,7 +39,7 @@ namespace Okta.Sdk.Abstractions
 
         private T Cast(object item)
         {
-            var isResource = Resource.ResourceTypeInfo.IsAssignableFrom(_targetTypeInfo);
+            var isResource = BaseResource.ResourceTypeInfo.IsAssignableFrom(_targetTypeInfo);
             if (isResource)
             {
                 var nestedData = item as IDictionary<string, object>;

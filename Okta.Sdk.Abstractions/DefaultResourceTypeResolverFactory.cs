@@ -13,7 +13,7 @@ namespace Okta.Sdk.Abstractions
     {
         public override IEnumerable<TypeInfo> GetAllResourceDefinedTypes()
         {
-            return typeof(Resource).GetTypeInfo().Assembly.DefinedTypes.ToArray();
+            return typeof(BaseResource).GetTypeInfo().Assembly.DefinedTypes.ToArray();
         }
     }
 }

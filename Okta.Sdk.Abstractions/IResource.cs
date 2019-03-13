@@ -43,7 +43,7 @@ namespace Okta.Sdk.Abstractions
         /// <summary>
         /// Gets a resource property by name.
         /// </summary>
-        /// <remarks>In derived classes, use the more specific methods such as <see cref="Resource.GetStringProperty(string)"/> and <see cref="Resource.GetIntegerProperty(string)"/> instead.</remarks>
+        /// <remarks>In derived classes, use the more specific methods such as <see cref="BaseResource.GetStringProperty(string)"/> and <see cref="BaseResource.GetIntegerProperty(string)"/> instead.</remarks>
         /// <typeparam name="T">The property type.</typeparam>
         /// <param name="name">The property name.</param>
         /// <returns>The strongly-typed property value, or <c>null</c>.</returns>

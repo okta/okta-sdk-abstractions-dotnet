@@ -11,11 +11,11 @@ using Newtonsoft.Json.Linq;
 namespace Okta.Sdk.Abstractions
 {
     /// <summary>
-    /// This class provides special serialization for <see cref="Resource"/> types.
+    /// This class provides special serialization for <see cref="BaseResource"/> types.
     /// </summary>
     public sealed class ResourceSerializingConverter : JsonConverter
     {
-        private static readonly TypeInfo ResourceTypeInfo = typeof(Resource).GetTypeInfo();
+        private static readonly TypeInfo ResourceTypeInfo = typeof(BaseResource).GetTypeInfo();
 
         /// <inheritdoc/>
         public override bool CanRead => false;
@@ -34,7 +34,7 @@ namespace Okta.Sdk.Abstractions
         /// <inheritdoc/>
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-            var resource = value as Resource;
+            var resource = value as BaseResource;
             if (value == null)
             {
                 new JObject().WriteTo(writer);

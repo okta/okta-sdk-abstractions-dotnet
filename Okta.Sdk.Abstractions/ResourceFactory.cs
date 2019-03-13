@@ -12,7 +12,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 namespace Okta.Sdk.Abstractions
 {
     /// <summary>
-    /// Constructs <see cref="Resource"/>s based on deserialized dictionaries.
+    /// Constructs <see cref="BaseResource"/>s based on deserialized dictionaries.
     /// </summary>
     public sealed class ResourceFactory
     {
@@ -46,14 +46,14 @@ namespace Okta.Sdk.Abstractions
         }
 
         /// <summary>
-        /// Creates a new <see cref="Resource"/> from an existing dictionary.
+        /// Creates a new <see cref="BaseResource"/> from an existing dictionary.
         /// </summary>
-        /// <typeparam name="T">The <see cref="Resource"/> type.</typeparam>
+        /// <typeparam name="T">The <see cref="BaseResource"/> type.</typeparam>
         /// <param name="existingDictionary">The existing dictionary.</param>
-        /// <returns>The created <see cref="Resource"/>.</returns>
+        /// <returns>The created <see cref="BaseResource"/>.</returns>
         public T CreateFromExistingData<T>(IDictionary<string, object> existingDictionary)
         {
-            if (!Resource.ResourceTypeInfo.IsAssignableFrom(typeof(T).GetTypeInfo()))
+            if (!BaseResource.ResourceTypeInfo.IsAssignableFrom(typeof(T).GetTypeInfo()))
             {
                 throw new InvalidOperationException("Resources must inherit from the Resource class.");
             }
@@ -61,7 +61,7 @@ namespace Okta.Sdk.Abstractions
             var typeResolver = _resourceTypeResolverFactory.CreateResolver<T>();
             var resourceType = typeResolver.GetResolvedType(existingDictionary);
 
-            var resource = Activator.CreateInstance(resourceType) as Resource;
+            var resource = Activator.CreateInstance(resourceType) as BaseResource;
 
             resource.Initialize(_client, this, existingDictionary, _logger);
 
@@ -69,14 +69,14 @@ namespace Okta.Sdk.Abstractions
         }
 
         /// <summary>
-        /// Creates a new <see cref="Resource"/> with the specified data.
+        /// Creates a new <see cref="BaseResource"/> with the specified data.
         /// </summary>
-        /// <typeparam name="T">The <see cref="Resource"/> type.</typeparam>
+        /// <typeparam name="T">The <see cref="BaseResource"/> type.</typeparam>
         /// <param name="data">The initial data.</param>
-        /// <returns>The created <see cref="Resource"/>.</returns>
+        /// <returns>The created <see cref="BaseResource"/>.</returns>
         public T CreateNew<T>(IDictionary<string, object> data)
         {
-            if (!Resource.ResourceTypeInfo.IsAssignableFrom(typeof(T).GetTypeInfo()))
+            if (!BaseResource.ResourceTypeInfo.IsAssignableFrom(typeof(T).GetTypeInfo()))
             {
                 throw new InvalidOperationException("Resources must inherit from the Resource class.");
             }
@@ -84,7 +84,7 @@ namespace Okta.Sdk.Abstractions
             var typeResolver = _resourceTypeResolverFactory.CreateResolver<T>();
             var resourceType = typeResolver.GetResolvedType(data);
 
-            var resource = Activator.CreateInstance(resourceType) as Resource;
+            var resource = Activator.CreateInstance(resourceType) as BaseResource;
 
             var dictionary = NewDictionary(data);
             resource.Initialize(_client, this, dictionary, _logger);

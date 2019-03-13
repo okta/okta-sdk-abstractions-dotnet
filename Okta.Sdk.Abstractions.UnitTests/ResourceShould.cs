@@ -17,7 +17,7 @@ namespace Okta.Sdk.Abstractions.UnitTests
         [Fact]
         public void NotThrowForNullData()
         {
-            var resource = new Resource();
+            var resource = new BaseResource();
 
             resource.Should().NotBeNull();
         }
@@ -59,7 +59,7 @@ namespace Okta.Sdk.Abstractions.UnitTests
             };
 
             var factory = new ResourceFactory(null, null, null);
-            var resource = factory.CreateNew<Resource>(data);
+            var resource = factory.CreateNew<BaseResource>(data);
 
             resource.GetProperty<string>("foo").Should().Be("abc");
             resource.GetProperty<string>("empty").Should().Be(string.Empty);
@@ -71,7 +71,7 @@ namespace Okta.Sdk.Abstractions.UnitTests
         public void RoundtripStringProperty()
         {
             var factory = new ResourceFactory(null, null, null);
-            var resource = factory.CreateNew<Resource>(null);
+            var resource = factory.CreateNew<BaseResource>(null);
 
             resource.GetProperty<string>("foo").Should().BeNull();
 
@@ -90,7 +90,7 @@ namespace Okta.Sdk.Abstractions.UnitTests
             };
 
             var factory = new ResourceFactory(null, null, null);
-            var resource = factory.CreateNew<Resource>(data);
+            var resource = factory.CreateNew<BaseResource>(data);
 
             resource.GetProperty<bool?>("yes").Should().BeTrue();
             resource.GetProperty<bool?>("no").Should().BeFalse();
@@ -102,7 +102,7 @@ namespace Okta.Sdk.Abstractions.UnitTests
         public void RoundtripBooleanProperty()
         {
             var factory = new ResourceFactory(null, null, null);
-            var resource = factory.CreateNew<Resource>(null);
+            var resource = factory.CreateNew<BaseResource>(null);
 
             resource.GetProperty<bool?>("foo").Should().BeNull();
 
@@ -121,7 +121,7 @@ namespace Okta.Sdk.Abstractions.UnitTests
             };
 
             var factory = new ResourceFactory(null, null, null);
-            var resource = factory.CreateNew<Resource>(data);
+            var resource = factory.CreateNew<BaseResource>(data);
 
             resource.GetProperty<int?>("min").Should().Be(int.MinValue);
             resource.GetProperty<int?>("max").Should().Be(int.MaxValue);
@@ -133,7 +133,7 @@ namespace Okta.Sdk.Abstractions.UnitTests
         public void RoundtripIntProperty()
         {
             var factory = new ResourceFactory(null, null, null);
-            var resource = factory.CreateNew<Resource>(null);
+            var resource = factory.CreateNew<BaseResource>(null);
 
             resource.GetProperty<int?>("foo").Should().BeNull();
 
@@ -152,7 +152,7 @@ namespace Okta.Sdk.Abstractions.UnitTests
             };
 
             var factory = new ResourceFactory(null, null, null);
-            var resource = factory.CreateNew<Resource>(data);
+            var resource = factory.CreateNew<BaseResource>(data);
 
             resource.GetProperty<long?>("min").Should().Be(long.MinValue);
             resource.GetProperty<long?>("max").Should().Be(long.MaxValue);
@@ -164,7 +164,7 @@ namespace Okta.Sdk.Abstractions.UnitTests
         public void RoundtripLongProperty()
         {
             var factory = new ResourceFactory(null, null, null);
-            var resource = factory.CreateNew<Resource>(null);
+            var resource = factory.CreateNew<BaseResource>(null);
 
             resource.GetProperty<long?>("foo").Should().BeNull();
 
@@ -183,7 +183,7 @@ namespace Okta.Sdk.Abstractions.UnitTests
             };
 
             var factory = new ResourceFactory(null, null, null);
-            var resource = factory.CreateNew<Resource>(data);
+            var resource = factory.CreateNew<BaseResource>(data);
 
             resource.GetProperty<DateTimeOffset?>("dto").Should().Be(new DateTimeOffset(2015, 12, 27, 20, 15, 00, TimeSpan.FromHours(-6)));
             resource.GetProperty<DateTimeOffset?>("iso").Should().Be(new DateTimeOffset(2016, 11, 6, 17, 05, 30, 400, TimeSpan.FromHours(-8)));
@@ -195,7 +195,7 @@ namespace Okta.Sdk.Abstractions.UnitTests
         public void RoundtripDateTimeProperty()
         {
             var factory = new ResourceFactory(null, null, null);
-            var resource = factory.CreateNew<Resource>(null);
+            var resource = factory.CreateNew<BaseResource>(null);
 
             resource.GetProperty<DateTimeOffset?>("foo").Should().BeNull();
 
@@ -212,7 +212,7 @@ namespace Okta.Sdk.Abstractions.UnitTests
             };
 
             var factory = new ResourceFactory(null, null, null);
-            var resource = factory.CreateNew<Resource>(data);
+            var resource = factory.CreateNew<BaseResource>(data);
 
             var things = resource.GetArrayProperty<string>("things");
             things.Should().BeEquivalentTo("foo", "bar", "baz");
@@ -239,7 +239,7 @@ namespace Okta.Sdk.Abstractions.UnitTests
             };
 
             var factory = new ResourceFactory(null, null, null);
-            var resource = factory.CreateNew<Resource>(data);
+            var resource = factory.CreateNew<BaseResource>(data);
 
             var profiles = resource.GetArrayProperty<TestResource>("things");
             profiles.Should().HaveCount(2);
@@ -253,7 +253,7 @@ namespace Okta.Sdk.Abstractions.UnitTests
         public void RoundtripListProperty()
         {
             var factory = new ResourceFactory(null, null, null);
-            var resource = factory.CreateNew<Resource>(null);
+            var resource = factory.CreateNew<BaseResource>(null);
 
             resource.GetArrayProperty<string>("foo").Should().BeEmpty();
 
@@ -275,7 +275,7 @@ namespace Okta.Sdk.Abstractions.UnitTests
             };
 
             var factory = new ResourceFactory(null, null, null);
-            var resource = factory.CreateNew<Resource>(data);
+            var resource = factory.CreateNew<BaseResource>(data);
 
             resource.GetProperty<TestEnum>("status1").Should().Be(TestEnum.Foo);
             resource.GetProperty<TestEnum>("status2").Should().Be(TestEnum.Bar);
@@ -297,7 +297,7 @@ namespace Okta.Sdk.Abstractions.UnitTests
             };
 
             var factory = new ResourceFactory(null, null, null);
-            var resource = factory.CreateNew<Resource>(data);
+            var resource = factory.CreateNew<BaseResource>(data);
             var things = resource.GetArrayProperty<TestEnum>("things");
 
             things.Should().NotBeNullOrEmpty();
@@ -325,7 +325,7 @@ namespace Okta.Sdk.Abstractions.UnitTests
             };
 
             var factory = new ResourceFactory(null, null, null);
-            var resource = factory.CreateNew<Resource>(data);
+            var resource = factory.CreateNew<BaseResource>(data);
             var things = resource.GetArrayProperty<TestEnum>("things");
 
             things.Should().NotBeNullOrEmpty();
@@ -347,7 +347,7 @@ namespace Okta.Sdk.Abstractions.UnitTests
         public void RoundtripEnumProperty()
         {
             var factory = new ResourceFactory(null, null, null);
-            var resource = factory.CreateNew<Resource>(null);
+            var resource = factory.CreateNew<BaseResource>(null);
 
             resource.GetProperty<TestEnum>("foo").Should().BeNull();
 

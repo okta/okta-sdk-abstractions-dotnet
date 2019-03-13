@@ -6,7 +6,7 @@
 namespace Okta.Sdk.Abstractions
 {
     /// <inheritdoc/>
-    public sealed class ApiErrorCause : Resource, IApiErrorCause
+    public sealed class ApiErrorCause : BaseResource, IApiErrorCause
     {
         /// <inheritdoc/>
         public string ErrorSummary => GetStringProperty("errorSummary");

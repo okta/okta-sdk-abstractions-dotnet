@@ -76,7 +76,7 @@ namespace Okta.Sdk.Abstractions
             var foundConcrete = GetAllResourceDefinedTypes().FirstOrDefault(x =>
                 x.IsClass == true
                 && typeInfo.IsAssignableFrom(x)
-                && x.BaseType.GetTypeInfo().IsSubclassOf(typeof(Resource)));
+                && x.BaseType.GetTypeInfo().IsSubclassOf(typeof(BaseResource)));
             return foundConcrete?.AsType() ?? possiblyInterface;
         }
 

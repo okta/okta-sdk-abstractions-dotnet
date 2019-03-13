@@ -134,12 +134,12 @@ namespace Okta.Sdk.Abstractions
 
         /// <inheritdoc/>
         public Task<T> GetAsync<T>(string href, CancellationToken cancellationToken = default(CancellationToken))
-            where T : Resource, new()
+            where T : BaseResource, new()
             => GetAsync<T>(new HttpRequest { Uri = href }, cancellationToken);
 
         /// <inheritdoc/>
         public async Task<T> GetAsync<T>(HttpRequest request, CancellationToken cancellationToken = default(CancellationToken))
-            where T : Resource, new()
+            where T : BaseResource, new()
         {
             var response = await _dataStore.GetAsync<T>(request, _requestContext, cancellationToken).ConfigureAwait(false);
             return response?.Payload;
@@ -164,16 +164,16 @@ namespace Okta.Sdk.Abstractions
 
         /// <inheritdoc/>
         public Task<TResponse> PostAsync<TResponse>(string href, object model, CancellationToken cancellationToken = default(CancellationToken))
-            where TResponse : Resource, new()
+            where TResponse : BaseResource, new()
             => PostAsync<TResponse>(new HttpRequest { Uri = href, Payload = model }, cancellationToken);
 
         /// <inheritdoc/>
         public Task PostAsync(HttpRequest request, CancellationToken cancellationToken = default(CancellationToken))
-            => PostAsync<Resource>(request, cancellationToken);
+            => PostAsync<BaseResource>(request, cancellationToken);
 
         /// <inheritdoc/>
         public async Task<TResponse> PostAsync<TResponse>(HttpRequest request, CancellationToken cancellationToken = default(CancellationToken))
-            where TResponse : Resource, new()
+            where TResponse : BaseResource, new()
         {
             var response = await _dataStore.PostAsync<TResponse>(request, _requestContext, cancellationToken).ConfigureAwait(false);
             return response?.Payload;
@@ -185,16 +185,16 @@ namespace Okta.Sdk.Abstractions
 
         /// <inheritdoc/>
         public Task<TResponse> PutAsync<TResponse>(string href, object model, CancellationToken cancellationToken = default(CancellationToken))
-            where TResponse : Resource, new()
+            where TResponse : BaseResource, new()
             => PutAsync<TResponse>(new HttpRequest { Uri = href, Payload = model }, cancellationToken);
 
         /// <inheritdoc/>
         public Task PutAsync(HttpRequest request, CancellationToken cancellationToken = default(CancellationToken))
-            => PutAsync<Resource>(request, cancellationToken);
+            => PutAsync<BaseResource>(request, cancellationToken);
 
         /// <inheritdoc/>
         public async Task<TResponse> PutAsync<TResponse>(HttpRequest request, CancellationToken cancellationToken = default(CancellationToken))
-            where TResponse : Resource, new()
+            where TResponse : BaseResource, new()
         {
             var response = await _dataStore.PutAsync<TResponse>(request, _requestContext, cancellationToken).ConfigureAwait(false);
             return response?.Payload;

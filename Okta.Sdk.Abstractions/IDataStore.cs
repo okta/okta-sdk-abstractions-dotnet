@@ -31,21 +31,21 @@ namespace Okta.Sdk.Abstractions
         ISerializer Serializer { get; }
 
         /// <summary>
-        /// Gets a resource and deserializes it to a <see cref="Resource"/> type.
+        /// Gets a resource and deserializes it to a <see cref="BaseResource"/> type.
         /// </summary>
-        /// <typeparam name="T">The <see cref="Resource"/> type to deserialize the returned data to.</typeparam>
+        /// <typeparam name="T">The <see cref="BaseResource"/> type to deserialize the returned data to.</typeparam>
         /// <param name="request">The HTTP request options.</param>
         /// <param name="requestContext">Information about the upstream request.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The deserialized resource and <see cref="HttpResponse"/> data.</returns>
         /// <exception cref="OktaApiException">An API error occurred.</exception>
         Task<HttpResponse<T>> GetAsync<T>(HttpRequest request, RequestContext requestContext, CancellationToken cancellationToken)
-            where T : Resource, new();
+            where T : BaseResource, new();
 
         /// <summary>
-        /// Gets an array of resources and deserializes each item to a <see cref="Resource"/> type.
+        /// Gets an array of resources and deserializes each item to a <see cref="BaseResource"/> type.
         /// </summary>
-        /// <typeparam name="T">The <see cref="Resource"/> type to deserialize the returned data to.</typeparam>
+        /// <typeparam name="T">The <see cref="BaseResource"/> type to deserialize the returned data to.</typeparam>
         /// <param name="request">The HTTP request options.</param>
         /// <param name="requestContext">Information about the upstream request.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
@@ -55,28 +55,28 @@ namespace Okta.Sdk.Abstractions
             where T : IResource;
 
         /// <summary>
-        /// Posts data to an endpoint and deserializes the response to a <see cref="Resource"/> type.
+        /// Posts data to an endpoint and deserializes the response to a <see cref="BaseResource"/> type.
         /// </summary>
-        /// <typeparam name="TResponse">The <see cref="Resource"/> type to deserialize the returned data to.</typeparam>
+        /// <typeparam name="TResponse">The <see cref="BaseResource"/> type to deserialize the returned data to.</typeparam>
         /// <param name="request">The HTTP request options.</param>
         /// <param name="requestContext">Information about the upstream request.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The deserialized response resource and <see cref="HttpResponse"/> data.</returns>
         /// <exception cref="OktaApiException">An API error occurred.</exception>
         Task<HttpResponse<TResponse>> PostAsync<TResponse>(HttpRequest request, RequestContext requestContext, CancellationToken cancellationToken)
-            where TResponse : Resource, new();
+            where TResponse : BaseResource, new();
 
         /// <summary>
-        /// Puts data to an endpoint and deserializes the response to a <see cref="Resource"/> type.
+        /// Puts data to an endpoint and deserializes the response to a <see cref="BaseResource"/> type.
         /// </summary>
-        /// <typeparam name="TResponse">The <see cref="Resource"/> type to deserialize the returned data to.</typeparam>
+        /// <typeparam name="TResponse">The <see cref="BaseResource"/> type to deserialize the returned data to.</typeparam>
         /// <param name="request">The HTTP request options.</param>
         /// <param name="requestContext">Information about the upstream request.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The deserialized response resource and <see cref="HttpResponse"/> data.</returns>
         /// <exception cref="OktaApiException">An API error occurred.</exception>
         Task<HttpResponse<TResponse>> PutAsync<TResponse>(HttpRequest request, RequestContext requestContext, CancellationToken cancellationToken)
-            where TResponse : Resource, new();
+            where TResponse : BaseResource, new();
 
         /// <summary>
         /// Deletes a resource.

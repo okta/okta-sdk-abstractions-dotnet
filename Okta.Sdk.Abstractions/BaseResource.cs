@@ -11,7 +11,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Okta.Sdk.Abstractions
 {
-    public class Resource : IResource
+    public class BaseResource : IResource
     {
         internal static readonly TypeInfo ResourceTypeInfo = typeof(IResource).GetTypeInfo();
 
@@ -21,9 +21,9 @@ namespace Okta.Sdk.Abstractions
         private IDictionary<string, object> _data;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Resource"/> class.
+        /// Initializes a new instance of the <see cref="BaseResource"/> class.
         /// </summary>
-        public Resource()
+        public BaseResource()
         {
             Initialize(null, null, null, null);
         }
@@ -147,7 +147,7 @@ namespace Okta.Sdk.Abstractions
         {
             switch (value)
             {
-                case Resource resource:
+                case BaseResource resource:
                     SetProperty(name, resource?._data);
                     break;
 
@@ -305,7 +305,7 @@ namespace Okta.Sdk.Abstractions
         /// <param name="name">The property name.</param>
         /// <returns>The embedded resource, or <c>null</c>.</returns>
         protected T GetResourceProperty<T>(string name)
-            where T : Resource, new()
+            where T : BaseResource, new()
             => GetResourcePropertyInternal<T>(name);
 
         private T GetResourcePropertyInternal<T>(string key)

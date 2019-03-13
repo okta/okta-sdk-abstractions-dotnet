@@ -8,7 +8,7 @@ using System.Collections.Generic;
 namespace Okta.Sdk.Abstractions
 {
     /// <inheritdoc/>
-    public sealed class ApiError : Resource, IApiError
+    public sealed class ApiError : BaseResource, IApiError
     {
         /// <inheritdoc/>
         public string ErrorCode => GetStringProperty("errorCode");

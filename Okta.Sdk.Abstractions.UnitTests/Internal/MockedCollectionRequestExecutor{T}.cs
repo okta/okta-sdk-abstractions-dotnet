@@ -32,7 +32,7 @@ namespace Okta.Sdk.Abstractions.UnitTests.Internal
             var resources = _items
                 .Skip(_currentPage * _pageSize)
                 .Take(_pageSize)
-                .Cast<Resource>();
+                .Cast<BaseResource>();
 
             var itemData = resources
                 .Select(x => x.GetData())
