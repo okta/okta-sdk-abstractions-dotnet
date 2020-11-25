@@ -2,6 +2,7 @@
 [![Nuget](https://img.shields.io/nuget/v/Okta.Sdk.Abstractions)](https://www.nuget.org/packages/Okta.Sdk.Abstractions)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
+
 # Okta SDK Abstractions .NET
 
 The Okta Abstractions project contains common modules use across Okta .NET ecosystem such as Okta specific configuration validation.
