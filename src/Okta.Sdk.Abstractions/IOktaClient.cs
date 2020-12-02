@@ -14,6 +14,7 @@ namespace Okta.Sdk.Abstractions
     /// </summary>
     public interface IOktaClient
     {
+        // TODO: Review this change. We could make this generic.
         /// <summary>
         /// Gets the configuration passed to this <see cref="IOktaClient">OktaClient</see>.
         /// </summary>
@@ -21,7 +22,7 @@ namespace Okta.Sdk.Abstractions
         /// The client configuration.
         /// </value>
         /// <remarks>The configuration is immutable after the client is initialized. This property references a copy of the configuration.</remarks>
-        OktaClientConfiguration Configuration { get; }
+        //OktaClientConfiguration Configuration { get; }
 
         /// <summary>
         /// Creates a new <see cref="IOktaClient">OktaClient</see> scoped to the given request context.
@@ -29,7 +30,7 @@ namespace Okta.Sdk.Abstractions
         /// <param name="requestContext">The request context</param>
         /// <remarks>This method is used to temporarily create a copy of the client in order to pass information about the current request to the Okta API.</remarks>
         /// <returns>The new client.</returns>
-        IOktaClient CreatedScoped(RequestContext requestContext);
+        IOktaClient CreateScoped(RequestContext requestContext);
 
         /// <summary>
         /// Gets a resource by URL and deserializes it to a <see cref="BaseResource"/> type.
@@ -208,5 +209,21 @@ namespace Okta.Sdk.Abstractions
         Task DeleteAsync(
             HttpRequest request,
             CancellationToken cancellationToken = default(CancellationToken));
+
+        /// <summary>
+        /// Sends data to an endpoint by specifying the HTTP request options, and deserializes the response payload to a <see cref="BaseResource"/> type.
+        /// </summary>
+        /// <remarks>You typically only need to use this method if you are working with resources not natively handled by this library.</remarks>
+        /// <typeparam name="TResponse">The <see cref="BaseResource"/> type to deserialize the returned data to.</typeparam>
+        /// <param name="request">The request options.</param>
+        /// /// <param name="httpVerb">The HTTP protocol verb.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>The deserialized response data.</returns>
+        /// <exception cref="OktaApiException">An API error occurred.</exception>
+        Task<TResponse> SendAsync<TResponse>(
+            HttpRequest request,
+            HttpVerb httpVerb,
+            CancellationToken cancellationToken = default(CancellationToken))
+            where TResponse : BaseResource, new();
     }
 }
