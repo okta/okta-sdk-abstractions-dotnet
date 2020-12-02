@@ -15,14 +15,14 @@ namespace Okta.Sdk.Abstractions
     public interface IOktaClient
     {
         // TODO: Review this change. We could make this generic.
-        /// <summary>
-        /// Gets the configuration passed to this <see cref="IOktaClient">OktaClient</see>.
-        /// </summary>
-        /// <value>
-        /// The client configuration.
-        /// </value>
-        /// <remarks>The configuration is immutable after the client is initialized. This property references a copy of the configuration.</remarks>
-        //OktaClientConfiguration Configuration { get; }
+        ///// <summary>
+        ///// Gets the configuration passed to this <see cref="IOktaClient">OktaClient</see>.
+        ///// </summary>
+        ///// <value>
+        ///// The client configuration.
+        ///// </value>
+        ///// <remarks>The configuration is immutable after the client is initialized. This property references a copy of the configuration.</remarks>
+        // OktaClientConfiguration Configuration { get; }
 
         /// <summary>
         /// Creates a new <see cref="IOktaClient">OktaClient</see> scoped to the given request context.
