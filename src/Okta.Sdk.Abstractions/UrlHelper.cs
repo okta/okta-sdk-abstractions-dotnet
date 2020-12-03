@@ -13,11 +13,11 @@ namespace Okta.Sdk.Abstractions
     public static class UrlHelper
     {
         /// <summary>
-        /// Gets the Okta domain given an issuer.
+        /// Gets the Okta root Url given an issuer.
         /// </summary>
         /// <param name="issuer">The issuer, for example, "https://test-org.oktapreview.com/oauth2/default".</param>
         /// <returns>The Okta domain, for example, "https://test-org.oktapreview.com".</returns>
-        public static string GetOktaDomain(string issuer)
+        public static string GetOktaRootUrl(string issuer)
         {
             if (string.IsNullOrEmpty(issuer))
             {

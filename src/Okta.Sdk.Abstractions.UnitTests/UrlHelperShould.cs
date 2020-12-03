@@ -12,7 +12,7 @@ namespace Okta.Sdk.Abstractions.UnitTests
         [InlineData("http://devex-testing.okta.com/oauth2/default", "http://devex-testing.okta.com")]
         public void GetOktaDomain(string issuer, string expectedOktaDomain)
         {
-            UrlHelper.GetOktaDomain(issuer).Should().Be(expectedOktaDomain);
+            UrlHelper.GetOktaRootUrl(issuer).Should().Be(expectedOktaDomain);
         }
     }
 }

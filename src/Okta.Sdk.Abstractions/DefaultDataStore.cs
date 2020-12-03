@@ -132,7 +132,7 @@ namespace Okta.Sdk.Abstractions
                 request.Headers["X-Forwarded-Proto"] = context.XForwardedProto;
             }
 
-            if (context.AuthorizationSettings.AuthorizationType != AuthorizationType.None)
+            if (context?.AuthorizationSettings?.AuthorizationType != AuthorizationType.None)
             {
                 request.Headers["Authorization-Scheme"] = context.AuthorizationSettings.AuthorizationType.ToString();
                 request.Headers["Authorization-Value"] = context.AuthorizationSettings.Value;
