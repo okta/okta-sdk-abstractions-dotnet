@@ -34,6 +34,12 @@ namespace Okta.Sdk.Abstractions
         IDictionary<string, object> GetData();
 
         /// <summary>
+        /// Gets the raw JSON data backing this resource.
+        /// </summary>
+        /// <returns>The raw JSON data backing this resource</returns>
+        string GetRaw();
+
+        /// <summary>
         /// Sets a resource property by name
         /// </summary>
         /// <param name="name"> The property name</param>

@@ -128,11 +128,13 @@ namespace Okta.Sdk.Abstractions
             return compiledConfig;
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Gets or sets the Okta configuration.
+        /// </summary>
         public OktaClientConfiguration Configuration { get; protected set; }
 
         /// <inheritdoc/>
-        public IOktaClient CreatedScoped(RequestContext requestContext)
+        public IOktaClient CreateScoped(RequestContext requestContext)
             => new BaseOktaClient(_dataStore, Configuration, requestContext);
 
         /// <summary>
@@ -220,5 +222,25 @@ namespace Okta.Sdk.Abstractions
         /// <inheritdoc/>
         public Task DeleteAsync(HttpRequest request, CancellationToken cancellationToken = default(CancellationToken))
             => _dataStore.DeleteAsync(request, _requestContext, cancellationToken);
+
+        /// <inheritdoc/>
+        public async Task<TResponse> SendAsync<TResponse>(HttpRequest request, HttpVerb httpVerb, CancellationToken cancellationToken = default)
+            where TResponse : BaseResource, new()
+        {
+            switch (httpVerb)
+            {
+                case HttpVerb.Get:
+                    return await GetAsync<TResponse>(request, cancellationToken).ConfigureAwait(false);
+                case HttpVerb.Post:
+                    return await PostAsync<TResponse>(request, cancellationToken).ConfigureAwait(false);
+                case HttpVerb.Put:
+                    return await PutAsync<TResponse>(request, cancellationToken).ConfigureAwait(false);
+                case HttpVerb.Delete:
+                    await DeleteAsync(request, cancellationToken).ConfigureAwait(false);
+                    return null;
+                default:
+                    return await GetAsync<TResponse>(request, cancellationToken).ConfigureAwait(false);
+            }
+        }
     }
 }

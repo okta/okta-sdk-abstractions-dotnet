@@ -5,10 +5,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using Newtonsoft.Json;
 
 namespace Okta.Sdk.Abstractions
 {
@@ -61,7 +63,7 @@ namespace Okta.Sdk.Abstractions
         /// <returns>The <see cref="IOktaClient">OktaClient</see> that created this resource.</returns>
         protected IOktaClient GetClient()
         {
-            return _client ?? throw new InvalidOperationException("Only resources retrieved or saved through a Client object cna call server-side methods.");
+            return _client ?? throw new InvalidOperationException("Only resources retrieved or saved through a Client object can call server-side methods.");
         }
 
         /// <inheritdoc/>
@@ -327,6 +329,12 @@ namespace Okta.Sdk.Abstractions
         {
             var nestedData = GetPropertyOrNull(key) as IDictionary<string, object>;
             return _resourceFactory.CreateFromExistingData<T>(nestedData);
+        }
+
+        /// <inheritdoc/>
+        public string GetRaw()
+        {
+            return JsonConvert.SerializeObject(GetData(), Formatting.Indented);
         }
     }
 }

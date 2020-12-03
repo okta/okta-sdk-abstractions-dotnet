@@ -7,7 +7,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Security.Authentication;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -20,8 +22,6 @@ namespace Okta.Sdk.Abstractions
     /// </summary>
     public sealed class DefaultRequestExecutor : IRequestExecutor
     {
-        private const string OktaClientUserAgentName = "oktasdk-dotnet";
-
         private readonly string _oktaDomain;
         private readonly HttpClient _httpClient;
         private readonly ILogger _logger;
@@ -49,7 +49,6 @@ namespace Okta.Sdk.Abstractions
         private static void ApplyDefaultClientSettings(HttpClient client, string oktaDomain, OktaClientConfiguration configuration)
         {
             client.BaseAddress = new Uri(oktaDomain, UriKind.Absolute);
-            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("SSWS", configuration.Token);
         }
 
         private string EnsureRelativeUrl(string uri)
@@ -70,6 +69,23 @@ namespace Okta.Sdk.Abstractions
             }
 
             return uri.TrimStart('/');
+        }
+
+        private string GetContentType(IEnumerable<KeyValuePair<string, string>> headers)
+        {
+            var contentType = HttpRequestContentBuilder.ContentTypeJson;
+
+            if (headers != null)
+            {
+                var header = headers.FirstOrDefault(x => string.Equals(x.Key, "Content-Type", StringComparison.OrdinalIgnoreCase));
+
+                if (!header.Equals(default(KeyValuePair<string, string>)))
+                {
+                    contentType = string.IsNullOrEmpty(header.Value) ? HttpRequestContentBuilder.ContentTypeJson : header.Value;
+                }
+            }
+
+            return contentType;
         }
 
         private async Task<HttpResponse<string>> SendAsync(
@@ -97,7 +113,7 @@ namespace Okta.Sdk.Abstractions
             }
         }
 
-        private static void ApplyHeadersToRequest(HttpRequestMessage request, IEnumerable<KeyValuePair<string, string>> headers)
+        private void ApplyHeadersToRequest(HttpRequestMessage request, IEnumerable<KeyValuePair<string, string>> headers)
         {
             if (headers == null || !headers.Any())
             {
@@ -106,7 +122,18 @@ namespace Okta.Sdk.Abstractions
 
             foreach (var header in headers)
             {
-                request.Headers.Add(header.Key, header.Value);
+                // Content-Type is set during the content creation. This is a limitation of .NET, that doesn't allow to set Content-Type as a request header.
+                if (!string.Equals(header.Key, "Content-Type", StringComparison.OrdinalIgnoreCase))
+                {
+                    request.Headers.Add(header.Key, header.Value);
+                }
+
+                // Authorization header is set with special via headers.Authorization.
+                if (string.Equals(header.Key, "Authorization-Scheme", StringComparison.OrdinalIgnoreCase))
+                {
+                    var authorizationHeaderValue = headers.FirstOrDefault(x => x.Key == "Authorization-Value").Value;
+                    _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(header.Value, authorizationHeaderValue);
+                }
             }
         }
 
@@ -128,13 +155,14 @@ namespace Okta.Sdk.Abstractions
         public Task<HttpResponse<string>> PostAsync(string href, IEnumerable<KeyValuePair<string, string>> headers, string body, CancellationToken cancellationToken)
         {
             var path = EnsureRelativeUrl(href);
+            var contentType = GetContentType(headers);
 
             var request = new HttpRequestMessage(HttpMethod.Post, new Uri(path, UriKind.Relative));
             ApplyHeadersToRequest(request, headers);
 
             request.Content = string.IsNullOrEmpty(body)
                 ? null
-                : new StringContent(body, System.Text.Encoding.UTF8, "application/json");
+                : HttpRequestContentBuilder.GetRequestContent(contentType, body);
 
             return SendAsync(request, cancellationToken);
         }
@@ -143,13 +171,14 @@ namespace Okta.Sdk.Abstractions
         public Task<HttpResponse<string>> PutAsync(string href, IEnumerable<KeyValuePair<string, string>> headers, string body, CancellationToken cancellationToken)
         {
             var path = EnsureRelativeUrl(href);
+            var contentType = GetContentType(headers);
 
             var request = new HttpRequestMessage(HttpMethod.Put, new Uri(path, UriKind.Relative));
             ApplyHeadersToRequest(request, headers);
 
             request.Content = string.IsNullOrEmpty(body)
                 ? null
-                : new StringContent(body, System.Text.Encoding.UTF8, "application/json");
+                : HttpRequestContentBuilder.GetRequestContent(contentType, body);
 
             return SendAsync(request, cancellationToken);
         }
