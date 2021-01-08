@@ -17,9 +17,7 @@ namespace Okta.Sdk.Abstractions
     {
         // Lazy ensures this only runs once and is cached.
         private readonly Lazy<string> _cachedUserAgent;
-
         private string _oktaSdkUserAgentName = string.Empty;
-
         private Version _sdkVersion;
 
         /// <summary>
@@ -39,6 +37,14 @@ namespace Okta.Sdk.Abstractions
         /// </summary>
         /// <returns>A User-Agent string with the default tokens, and any additional tokens.</returns>
         public string GetUserAgent() => _cachedUserAgent.Value;
+
+        /// <summary>
+        /// Replaces unsafe symbols with dashes
+        /// </summary>
+        /// <param name="input">String to sanitize</param>
+        /// <returns>Sanitized string</returns>
+        public static string Sanitize(string input)
+            => IllegalCharacters.Aggregate(input, (current, bad) => current.Replace(bad, '-'));
 
         private string Generate()
         {
@@ -62,8 +68,5 @@ namespace Okta.Sdk.Abstractions
         }
 
         private static readonly char[] IllegalCharacters = new char[] { '/', ':', ';', '(', ')' };
-
-        private static string Sanitize(string input)
-            => IllegalCharacters.Aggregate(input, (current, bad) => current.Replace(bad, '-'));
     }
 }
