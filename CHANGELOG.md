@@ -1,6 +1,10 @@
 # Changelog
 Running changelog of releases since `2.0.1`
 
+
+## v3.0.1
+- In `UserAgentBuilder` added sanitization of the Runtime Version token. Bracket symbols will be replaced with dashes on sanitization.  
+
 ## v3.0.0
 
 - Add support for `json+ion` error responses.
