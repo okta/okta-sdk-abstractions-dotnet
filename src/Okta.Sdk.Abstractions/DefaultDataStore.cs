@@ -166,10 +166,15 @@ namespace Okta.Sdk.Abstractions
                 throw new InvalidOperationException($"An error occurred deserializing the error body for response code {response.StatusCode}. See the inner exception for details.", ex);
             }
 
-            var contentTypeHeader = response.Headers.FirstOrDefault(x => string.Equals(x.Key, "Content-Type", StringComparison.OrdinalIgnoreCase));
+            var contentTypeHeader = default(KeyValuePair<string, IEnumerable<string>>);
+
+            if (response.Headers != null && response.Headers.Any())
+            {
+                contentTypeHeader = response.Headers.FirstOrDefault(x => string.Equals(x.Key, "Content-Type", StringComparison.OrdinalIgnoreCase));
+            }
 
             // If error format is ION
-            if (!contentTypeHeader.Equals(default(KeyValuePair<string, string>))
+            if (!contentTypeHeader.Equals(default(KeyValuePair<string, IEnumerable<string>>))
                 && contentTypeHeader.Value.FirstOrDefault().Contains("application/ion+json"))
             {
                 throw new OktaIonApiException(response.StatusCode, _resourceFactory.CreateNew<IonApiError>(errorData));

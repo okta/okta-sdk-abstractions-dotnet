@@ -1,6 +1,8 @@
 # Changelog
 Running changelog of releases since `2.0.1`
 
+## v3.0.2
+- Add sanity check for null headers when parsing errors.
 
 ## v3.0.1
 - Sanitize runtime version token in `UserAgentBuilder`. Bracket symbols are replaced with dashes on sanitization.  

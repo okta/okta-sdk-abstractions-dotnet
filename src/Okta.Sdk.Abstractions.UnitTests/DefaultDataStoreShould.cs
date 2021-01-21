@@ -90,6 +90,26 @@ namespace Okta.Sdk.Abstractions.UnitTests
         }
 
         [Fact]
+        public async Task ThrowApiExceptionWhenContentTypeIsNotProvided()
+        {
+            var response = @"
+                            {
+                                ""error"": ""invalid_grant"",
+                                ""error_description"": ""The interaction code is invalid or has expired.""
+                            }";
+
+            var mockResponseHeaders = new List<KeyValuePair<string, IEnumerable<string>>>();
+
+            var mockRequestExecutor = new MockedStringRequestExecutor(response, statusCode: 400, mockResponseHeaders);
+
+            var dataStore = new DefaultDataStore(mockRequestExecutor, new DefaultSerializer(), new ResourceFactory(null, null, null), NullLogger.Instance, new UserAgentBuilder("test", UserAgentHelper.SdkVersion));
+            var request = new HttpRequest { Uri = "https://foo.dev" };
+
+            await Assert.ThrowsAsync<OktaApiException>(
+                () => dataStore.PostAsync<TestResource>(request, new RequestContext(), CancellationToken.None));
+        }
+
+        [Fact]
         public async Task ThrowForNullExecutorResponseDuringGetArray()
         {
             // If the RequestExecutor returns a null HttpResponse, throw an informative exception.
