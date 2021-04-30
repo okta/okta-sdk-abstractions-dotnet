@@ -31,6 +31,7 @@ namespace Okta.Sdk.Abstractions
             return GetFormValidationErrorSummary();
         }
 
+        // Extracts error message from the top level of response object
         private string GetResponseErrorSummary()
         {
             var sbErrorSumary = new StringBuilder();
@@ -52,6 +53,118 @@ namespace Okta.Sdk.Abstractions
             return sbErrorSumary.ToString();
         }
 
+        /*
+         Extracts form validation error messages like in this case:
+
+         {
+          "version": "1.0.0",
+          "stateHandle": "028e-r0fW99Ud4dADthU5wogZhdxzLhvOUPnC6FXVx",
+          "expiresAt": "2021-04-27T22:05:50.000Z",
+          "intent": "LOGIN",
+          "remediation": {
+            "type": "array",
+            "value": [
+              {
+                "rel": [
+                  "create-form"
+                ],
+                "name": "reset-authenticator",
+                "relatesTo": [
+                  "$.currentAuthenticator"
+                ],
+                "href": "..................",
+                "method": "POST",
+                "produces": "application/ion+json; okta-version=1.0.0",
+                "value": [
+                  {
+                    "name": "credentials",
+                    "type": "object",
+                    "form": {
+                      "value": [
+                        {
+                          "name": "passcode",
+                          "label": "New password",
+                          "secret": true,
+                          "messages": {
+                            "type": "array",
+                            "value": [
+                              {
+                                "message": "Password requirements were not met. Password requirements: at least 8 characters, a lowercase letter, an uppercase letter, a number, no parts of your username. Your password cannot be any of your last 4 passwords.",
+                                "i18n": {
+                                  "key": "password.passwordRequirementsNotMet",
+                                  "params": [
+                                    "Password requirements: at least 8 characters, a lowercase letter, an uppercase letter, a number, no parts of your username. Your password cannot be any of your last 4 passwords."
+                                  ]
+            },
+                                "class": "ERROR"
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    "required": true
+                  },
+                  {
+        ........
+                }
+                ],
+                "accepts": "application/json; okta-version=1.0.0"
+              }
+            ]
+          },
+          "currentAuthenticator": {
+            "type": "object",
+            "value": {
+                "type": "password",
+              "key": "okta_password",
+              "id": "..................",
+              "displayName": "Password",
+              "methods": [
+                {
+                    "type": "password"
+                }
+              ],
+              "settings": {
+            ...................
+                        }
+               }
+            }
+        },
+          "authenticators": {
+            "type": "array",
+            "value": [
+              {
+                ..................
+              }
+            ]
+          },
+          "authenticatorEnrollments": {
+            "type": "array",
+            "value": [
+              {
+                ..................
+              },
+              {
+                ..................
+              }
+            ]
+          },
+          "recoveryAuthenticator": {
+            ..................
+          },
+          "user": {
+            ..................
+          },
+          "cancel": {
+            ..................
+          },
+          "app": {
+            ..................
+            }
+          }
+        }
+        */
         private string GetFormValidationErrorSummary()
         {
             var jToken = JToken.Parse(GetRaw());
