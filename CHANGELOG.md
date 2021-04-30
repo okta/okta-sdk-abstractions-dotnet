@@ -1,6 +1,9 @@
 # Changelog
 Running changelog of releases since `2.0.1`
 
+## v3.0.3
+- Add support for `json+ion` forms validation error responses 
+
 ## v3.0.2
 - Add sanity check for null headers when parsing errors.
 

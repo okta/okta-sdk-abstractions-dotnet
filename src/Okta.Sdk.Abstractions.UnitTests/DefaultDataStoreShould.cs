@@ -347,5 +347,110 @@ namespace Okta.Sdk.Abstractions.UnitTests
                 body: null,
                 cancellationToken: CancellationToken.None);
         }
+
+        [Fact]
+        public void GetErrorMessageFromFormValidationError()
+        {
+            #region response objects
+            var responseWithErrorMessage = @"{
+              ""remediation"": {
+                            ""type"": ""array"",
+                ""value"": [
+                  {
+                            ""rel"": [
+                                  ""create-form""
+                    ],
+                    ""name"": ""reset-authenticator"",
+                    ""relatesTo"": [
+                      ""$.currentAuthenticator""
+                    ],
+                    ""href"": "".................."",
+                    ""method"": ""POST"",
+                    ""produces"": ""application/ion+json; okta-version=1.0.0"",
+                    ""value"": [
+                      {
+                        ""name"": ""credentials"",
+                        ""type"": ""object"",
+                        ""form"": {
+                          ""value"": [
+                            {
+                              ""name"": ""passcode"",
+                              ""label"": ""New password"",
+                              ""secret"": true,
+                              ""messages"": {
+                                ""type"": ""array"",
+                                ""value"": [
+                                  {
+                                    ""message"": ""Error Message"",
+                                    ""i18n"": {
+                                      ""key"": ""password.passwordRequirementsNotMet"",
+                                      ""params"": [
+                                        ""Password requirements: at least 8 characters,""
+                                      ]
+                                    },
+                                    ""class"": ""ERROR""
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        },
+                        ""required"": true
+                      }
+                    ],
+                    ""accepts"": ""application/json; okta-version=1.0.0""
+                  }
+                ]
+              }
+            }";
+
+            var responseWithNoErrors = @"{
+              ""remediation"": {
+                            ""type"": ""array"",
+                ""value"": [
+                  {
+                            ""rel"": [
+                                  ""create-form""
+                    ],
+                    ""name"": ""reset-authenticator"",
+                    ""relatesTo"": [
+                      ""$.currentAuthenticator""
+                    ],
+                    ""value"": [
+                      {
+                        ""form"": {
+                          ""value"": [
+                            {
+                              ""name"": ""passcode"",
+                              ""label"": ""New password"",
+                              ""secret"": true,
+                            }
+                          ]
+                        },
+                        ""required"": true
+                      }
+                    ],
+                    ""accepts"": ""application/json; okta-version=1.0.0""
+                  }
+                ]
+              }
+            }";
+            #endregion response objects
+
+            var serializer = new DefaultSerializer();
+            var resourseFactory = new ResourceFactory(null, null, null);
+            var errorData = serializer.Deserialize(responseWithErrorMessage);
+            var errorObject = resourseFactory.CreateNew<IonApiError>(errorData);
+            errorObject.ErrorSummary.Should().Be("Error Message");
+
+            errorData = serializer.Deserialize(responseWithNoErrors);
+            errorObject = resourseFactory.CreateNew<IonApiError>(errorData);
+            errorObject.ErrorSummary.Should().BeNullOrEmpty();
+
+            errorData = serializer.Deserialize("{ }");
+            errorObject = resourseFactory.CreateNew<IonApiError>(errorData);
+            errorObject.ErrorSummary.Should().BeNullOrEmpty();
+        }
+
     }
 }

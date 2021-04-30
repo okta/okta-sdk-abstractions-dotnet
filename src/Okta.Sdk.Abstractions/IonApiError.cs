@@ -113,56 +113,7 @@ namespace Okta.Sdk.Abstractions
               }
             ]
           },
-          "currentAuthenticator": {
-            "type": "object",
-            "value": {
-                "type": "password",
-              "key": "okta_password",
-              "id": "..................",
-              "displayName": "Password",
-              "methods": [
-                {
-                    "type": "password"
-                }
-              ],
-              "settings": {
-            ...................
-                        }
-               }
-            }
-        },
-          "authenticators": {
-            "type": "array",
-            "value": [
-              {
-                ..................
-              }
-            ]
-          },
-          "authenticatorEnrollments": {
-            "type": "array",
-            "value": [
-              {
-                ..................
-              },
-              {
-                ..................
-              }
-            ]
-          },
-          "recoveryAuthenticator": {
-            ..................
-          },
-          "user": {
-            ..................
-          },
-          "cancel": {
-            ..................
-          },
-          "app": {
-            ..................
-            }
-          }
+ .........
         }
         */
         private string GetFormValidationErrorSummary()
