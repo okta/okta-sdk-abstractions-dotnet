@@ -18,7 +18,7 @@ namespace Okta.Sdk.Abstractions
         /// <param name="statusCode">The HTTP status code.</param>
         /// <param name="error">The error data.</param>
         public OktaIonApiException(int statusCode, IonApiError error)
-            : base(message: $"({statusCode}):({error.ErrorSummary})")
+            : base(error.ErrorSummary, statusCode)
         {
             _error = error;
             StatusCode = statusCode;

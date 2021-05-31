@@ -22,9 +22,8 @@ namespace Okta.Sdk.Abstractions
         /// <param name="statusCode">The HTTP status code.</param>
         /// <param name="error">The error data.</param>
         public OktaApiException(int statusCode, IApiError error)
-            : base(message: GetDetailedErrorMessage(statusCode, error))
+            : base(GetDetailedErrorMessage(statusCode, error), statusCode)
         {
-            StatusCode = statusCode;
             _error = error;
         }
 
@@ -35,14 +34,6 @@ namespace Okta.Sdk.Abstractions
         /// The error object returned by the Okta API.
         /// </value>
         public IApiError Error => _error;
-
-        /// <summary>
-        /// Gets the HTTP status code.
-        /// </summary>
-        /// <value>
-        /// The HTTP status code.
-        /// </value>
-        public int StatusCode { get; }
 
         /// <summary>
         /// Gets the error code from the <see cref="Error"/> object.
