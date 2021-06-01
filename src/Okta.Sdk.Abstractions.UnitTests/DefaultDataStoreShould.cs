@@ -68,7 +68,34 @@ namespace Okta.Sdk.Abstractions.UnitTests
         }
 
         [Fact]
-        public async Task ThrowApiExceptionWhenContentTypeIsJson()
+        public async Task ThrowApiExceptionWhenContentTypeIsJsonAndErrorDescriptionIsNotPresent()
+        {
+            var response = @"
+                            {
+                                ""errorCode"": ""E0000022"",
+                                ""errorSummary"": ""The endpoint does not support the provided HTTP method"",
+                                ""errorLink"": ""E0000022"",
+                                ""errorId"": ""oaey24IvG9nTJCx8gqGeh8j4Q"",
+                                ""errorCauses"": []
+                            }";
+
+            var mockResponseHeaders = new List<KeyValuePair<string, IEnumerable<string>>>();
+
+            mockResponseHeaders.Add(new KeyValuePair<string, IEnumerable<string>>("content-type", new List<string>() { "Accept: application/json" }));
+
+            var mockRequestExecutor = new MockedStringRequestExecutor(response, statusCode: 400, mockResponseHeaders);
+
+            var dataStore = new DefaultDataStore(mockRequestExecutor, new DefaultSerializer(), new ResourceFactory(null, null, null), NullLogger.Instance, new UserAgentBuilder("test", UserAgentHelper.SdkVersion));
+            var request = new HttpRequest { Uri = "https://foo.dev" };
+
+            OktaException exception =  await Assert.ThrowsAsync<OktaApiException>(
+                () => dataStore.PostAsync<TestResource>(request, new RequestContext(), CancellationToken.None));
+
+            exception.Message.Should().Contain("The endpoint does not support the provided HTTP method");
+        }
+
+        [Fact]
+        public async Task ThrowOAuthExceptionWhenErrorDescriptionIsPresent()
         {
             var response = @"
                             {
@@ -84,9 +111,11 @@ namespace Okta.Sdk.Abstractions.UnitTests
 
             var dataStore = new DefaultDataStore(mockRequestExecutor, new DefaultSerializer(), new ResourceFactory(null, null, null), NullLogger.Instance, new UserAgentBuilder("test", UserAgentHelper.SdkVersion));
             var request = new HttpRequest { Uri = "https://foo.dev" };
-
-            await Assert.ThrowsAsync<OktaApiException>(
+            
+            OktaException exception = await Assert.ThrowsAsync<OktaOAuthException>(
                 () => dataStore.PostAsync<TestResource>(request, new RequestContext(), CancellationToken.None));
+
+            exception.Message.Should().Contain("The interaction code is invalid or has expired.");
         }
 
         [Fact]
@@ -94,8 +123,11 @@ namespace Okta.Sdk.Abstractions.UnitTests
         {
             var response = @"
                             {
-                                ""error"": ""invalid_grant"",
-                                ""error_description"": ""The interaction code is invalid or has expired.""
+                                ""errorCode"": ""E0000022"",
+                                ""errorSummary"": ""The endpoint does not support the provided HTTP method"",
+                                ""errorLink"": ""E0000022"",
+                                ""errorId"": ""oaey24IvG9nTJCx8gqGeh8j4Q"",
+                                ""errorCauses"": []
                             }";
 
             var mockResponseHeaders = new List<KeyValuePair<string, IEnumerable<string>>>();

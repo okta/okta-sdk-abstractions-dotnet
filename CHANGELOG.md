@@ -3,10 +3,14 @@ Running changelog of releases since `2.0.1`
 
 ## v4.0.0
 
+### Features
+
+- Add `OktaOAuthException` to represent OAuth errors.
+
 ### Updates
 
 - Moved `StatusCode` property to `OktaException` to be accessible by derived classes.
-- Refactor `OktaIonApiException` to show the message that come from the server instead of `(StatusCode):(Message)`.
+- Refactor `OktaIonApiException` to show the message that comes from the server instead of `(StatusCode):(Message)`.
 
 ### Breaking changes
 
