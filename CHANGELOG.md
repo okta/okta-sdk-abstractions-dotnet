@@ -1,6 +1,38 @@
 # Changelog
 Running changelog of releases since `2.0.1`
 
+## v4.0.0
+
+### Updates
+
+- Moved `StatusCode` property to `OktaException` to be accessible by derived classes.
+- Refactor `OktaIonApiException` to show the message that come from the server instead of `(StatusCode):(Message)`.
+
+### Breaking changes
+
+- Change in default behavior when serializing resources (JSON objects). Previously, null resource properties would result in a resource object with all its properties set to `null`. Now, null resource properties would result in `null` property value. 
+
+_Before:_
+
+```
+{                                                 deserializedResource.Prop1.Should().Be("Hello World!");          
+    prop1 : "Hello World!",         =>            deserializedResource.NestedObject.Should().NotBeNull();
+    nestedObject: null                            deserializedResource.NestedObject.Prop1.Should().BeNull();
+}
+
+```
+
+_Now:_
+
+```
+{                                                 deserializedResource.Prop1.Should().Be("Hello World!");          
+    prop1 : "Hello World!",         =>            deserializedResource.NestedObject.Should().BeNull();
+    nestedObject: null                            
+}
+
+```
+
+
 ## v3.0.3
 - Add support for `json+ion` forms validation error responses 
 
