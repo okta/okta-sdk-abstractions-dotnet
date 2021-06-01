@@ -192,7 +192,7 @@ namespace Okta.Sdk.Abstractions
 
         // TODO: In the future refactor this to check OAuth endpoints instead
         private bool IsOAuthException(IDictionary<string, object> errorData) =>
-            errorData?.Keys.Contains("error_description") ?? false;
+            errorData?.Keys?.Contains("error_description") ?? false;
 
         private void PrepareRequest(HttpRequest request, RequestContext context)
         {
