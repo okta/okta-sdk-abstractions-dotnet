@@ -328,7 +328,15 @@ namespace Okta.Sdk.Abstractions
         private T GetResourcePropertyInternal<T>(string key)
         {
             var nestedData = GetPropertyOrNull(key) as IDictionary<string, object>;
-            return _resourceFactory.CreateFromExistingData<T>(nestedData);
+            var resourceProperty = _resourceFactory.CreateFromExistingData<T>(nestedData);
+
+            if (nestedData == null)
+            {
+                resourceProperty = default(T);
+                SetProperty(key, resourceProperty);
+            }
+
+            return resourceProperty;
         }
 
         /// <inheritdoc/>
