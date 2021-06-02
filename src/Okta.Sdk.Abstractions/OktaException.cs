@@ -22,6 +22,21 @@ namespace Okta.Sdk.Abstractions
         /// <summary>
         /// Initializes a new instance of the <see cref="OktaException"/> class.
         /// </summary>
+        /// <param name="message">
+        /// The message that describes the error.
+        /// </param>
+        /// <param name="statusCode">
+        /// The status Code.
+        /// </param>
+        public OktaException(string message, int statusCode)
+            : base(message)
+        {
+            StatusCode = statusCode;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="OktaException"/> class.
+        /// </summary>
         /// <param name="message">The message that describes the error.</param>
         public OktaException(string message)
             : base(message)
@@ -37,5 +52,10 @@ namespace Okta.Sdk.Abstractions
             : base(message, innerException)
         {
         }
+
+        /// <summary>
+        /// Gets the HTTP status code.
+        /// </summary>
+        public int StatusCode { get; private set; }
     }
 }
