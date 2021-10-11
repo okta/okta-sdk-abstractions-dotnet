@@ -1,4 +1,9 @@
-﻿using System.IO;
+﻿// <copyright file="CustomConfigurationProvidersShould.cs" company="Okta, Inc">
+// Copyright (c) 2018 - present Okta, Inc. All rights reserved.
+// Licensed under the Apache 2.0 license. See the LICENSE file in the project root for full license information.
+// </copyright>
+
+using System.IO;
 using System.Text;
 using System.Collections.Generic;
 using Xunit;
@@ -48,7 +53,8 @@ namespace Okta.Sdk.Abstractions.UnitTests
         {
             var envProvider = new TestableCustomEnvironmentVariablesProvider(mustStartWith: "oktakey", separator: "_", "okta");
 
-            envProvider.Load(new Dictionary<string, string> {
+            envProvider.Load(new Dictionary<string, string> 
+            {
                 { "oktakey_key1", "value1" },
                 { "oktakey_key2", "value2" },
                 { "key_key3", "value3" },
