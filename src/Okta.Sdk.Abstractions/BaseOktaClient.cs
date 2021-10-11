@@ -5,15 +5,16 @@
 
 using System;
 using System.IO;
-using System.Linq;
 using System.Net.Http;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using FlexibleConfiguration;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Okta.Sdk.Abstractions.Configuration;
+using Okta.Sdk.Abstractions.Configuration.Providers.EnvironmentVariables;
+using Okta.Sdk.Abstractions.Configuration.Providers.Object;
+using Okta.Sdk.Abstractions.Configuration.Providers.Yaml;
 
 namespace Okta.Sdk.Abstractions
 {
@@ -122,8 +123,10 @@ namespace Okta.Sdk.Abstractions
                 .AddObject(apiClientConfiguration);
 
             var compiledConfig = new OktaClientConfiguration();
-            configBuilder.Build().GetSection("okta").GetSection("client").Bind(compiledConfig);
-            configBuilder.Build().GetSection("okta").GetSection("testing").Bind(compiledConfig);
+            var oktaConfigSection = configBuilder.Build().GetSection("okta");
+
+            oktaConfigSection.GetSection("client").Bind(compiledConfig);
+            oktaConfigSection.GetSection("testing").Bind(compiledConfig);
 
             return compiledConfig;
         }
