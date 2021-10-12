@@ -1,6 +1,12 @@
 # Changelog
 Running changelog of releases since `2.0.1`
 
+## v4.0.1
+
+### Updates
+
+- Use Microsoft Configuration providers instead of [FlexibleConfiguration](https://github.com/nbarbettini/FlexibleConfiguration).
+
 ## v4.0.0
 
 ### Features
