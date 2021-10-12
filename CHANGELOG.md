@@ -1,6 +1,12 @@
 # Changelog
 Running changelog of releases since `2.0.1`
 
+## v4.0.1
+
+### Updates
+
+- Remove [FlexibleConfiguration](https://github.com/nbarbettini/FlexibleConfiguration) dependency and use Microsoft Configuration providers instead.
+
 ## v4.0.0
 
 ### Features

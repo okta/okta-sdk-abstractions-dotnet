@@ -30,6 +30,15 @@ namespace Okta.Sdk.Abstractions.UnitTests
     requestTimeout: 0 # seconds
     rateLimit:
       maxRetries: 4
+fruits:
+  - Mango
+  - Orange
+  - Apple
+  - Pomegranate
+  - Watermelon
+  - Banana
+  - Papaya
+  - Guava
 ";
 
             byte[] bytes = Encoding.UTF8.GetBytes(yamlFile);
@@ -38,13 +47,21 @@ namespace Okta.Sdk.Abstractions.UnitTests
                 var yamlProvider = new TestableYamlConfigurationProvider(new YamlConfigurationSource());
                 yamlProvider.Load(stream);
 
-                yamlProvider.LoadedData.Should().HaveCount(6);
+                yamlProvider.LoadedData.Should().HaveCount(14);
                 yamlProvider.LoadedData.Should().Contain(new KeyValuePair<string, string>("okta:client:connectionTimeout", "99"));
                 yamlProvider.LoadedData.Should().Contain(new KeyValuePair<string, string>("okta:client:orgUrl", "https://OrgUrl.okta.com"));
                 yamlProvider.LoadedData.Should().Contain(new KeyValuePair<string, string>("okta:client:oktaDomain", "https://Domain.okta.com"));
                 yamlProvider.LoadedData.Should().Contain(new KeyValuePair<string, string>("okta:client:token", "tokentokentokentokentokentokentoken"));
                 yamlProvider.LoadedData.Should().Contain(new KeyValuePair<string, string>("okta:client:requestTimeout", "0"));
                 yamlProvider.LoadedData.Should().Contain(new KeyValuePair<string, string>("okta:client:rateLimit:maxRetries", "4"));
+                yamlProvider.LoadedData.Should().Contain(new KeyValuePair<string, string>("fruits:0", "Mango"));
+                yamlProvider.LoadedData.Should().Contain(new KeyValuePair<string, string>("fruits:1", "Orange"));
+                yamlProvider.LoadedData.Should().Contain(new KeyValuePair<string, string>("fruits:2", "Apple"));
+                yamlProvider.LoadedData.Should().Contain(new KeyValuePair<string, string>("fruits:3", "Pomegranate"));
+                yamlProvider.LoadedData.Should().Contain(new KeyValuePair<string, string>("fruits:4", "Watermelon"));
+                yamlProvider.LoadedData.Should().Contain(new KeyValuePair<string, string>("fruits:5", "Banana"));
+                yamlProvider.LoadedData.Should().Contain(new KeyValuePair<string, string>("fruits:6", "Papaya"));
+                yamlProvider.LoadedData.Should().Contain(new KeyValuePair<string, string>("fruits:7", "Guava"));
             }
         }
 
