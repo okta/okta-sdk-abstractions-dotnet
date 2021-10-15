@@ -193,6 +193,15 @@ fruits:
             configuration.GetSection("okta").GetSection("client").Bind(compiledConfig);
             configuration.GetSection("okta").GetSection("testing").Bind(compiledConfig);
             configuration.Bind(compiledConfig);
+
+            compiledConfig.ConnectionTimeout.Should().Be(45);
+            compiledConfig.DisableHttpsCheck.Should().BeTrue();
+            compiledConfig.Token.Should().Be("tokentokentokentokentokentokentoken");
+            compiledConfig.OktaDomain.Should().Be("https://oktadomain.okta.com");
+            compiledConfig.Proxy.Port.Should().Be(8080);
+            compiledConfig.Proxy.Host.Should().Be("https://proxyHost");
+            compiledConfig.Proxy.Username.Should().Be("user");
+            compiledConfig.Proxy.Password.Should().Be("pass");
         }
     }
 }
