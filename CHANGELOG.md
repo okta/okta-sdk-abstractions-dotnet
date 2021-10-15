@@ -1,6 +1,13 @@
 # Changelog
 Running changelog of releases since `2.0.1`
 
+## v4.0.2
+
+### Bug Fixes
+
+- Fix for null properties treated as empty strings issue (`ObjectExtension`).
+- Exception was thrown when null object was passed in (`ObjectExtension`).
+
 ## v4.0.1
 
 ### Updates
