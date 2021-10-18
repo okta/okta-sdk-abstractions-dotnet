@@ -3,6 +3,7 @@
 // Licensed under the Apache 2.0 license. See the LICENSE file in the project root for full license information.
 // </copyright>
 
+using System;
 using System.IO;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Json;
@@ -13,7 +14,7 @@ namespace Okta.Sdk.Abstractions.Configuration.Providers.Object
     /// <summary>
     /// JObject configuration source.
     /// </summary>
-    public class ObjectConfigurationSource : IConfigurationSource
+    public class ObjectConfigurationSource : JsonStreamConfigurationSource
     {
         /// <summary>
         /// Gets configuration object.
@@ -34,21 +35,16 @@ namespace Okta.Sdk.Abstractions.Configuration.Providers.Object
         /// </summary>
         /// <param name="builder">The configuration builder.</param>
         /// <returns>The <see cref="IConfigurationProvider"/>.</returns>
-        public IConfigurationProvider Build(IConfigurationBuilder builder)
+        public override IConfigurationProvider Build(IConfigurationBuilder builder)
         {
-            var stream = new MemoryStream();
-            var writer = new StreamWriter(stream);
+            Stream = new MemoryStream();
+            var writer = new StreamWriter(Stream);
 
             writer.Write(JsonObject.ToString());
             writer.Flush();
-            stream.Seek(0, SeekOrigin.Begin);
+            Stream.Seek(0, SeekOrigin.Begin);
 
-            var configurationSource = new JsonStreamConfigurationSource
-            {
-                Stream = stream,
-            };
-
-            return new JsonStreamConfigurationProvider(configurationSource);
+            return new ObjectConfigurationProvider(this);
         }
     }
 }

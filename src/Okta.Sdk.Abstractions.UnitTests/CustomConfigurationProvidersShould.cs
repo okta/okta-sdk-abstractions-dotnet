@@ -8,10 +8,10 @@ using System.Text;
 using System.Collections.Generic;
 using Xunit;
 using FluentAssertions;
-using Microsoft.Extensions.Configuration;
-using Okta.Sdk.Abstractions.Configuration;
 using Okta.Sdk.Abstractions.UnitTests.Internal;
+using Okta.Sdk.Abstractions.Configuration;
 using Okta.Sdk.Abstractions.Configuration.Providers.Yaml;
+using Microsoft.Extensions.Configuration;
 using Okta.Sdk.Abstractions.Configuration.Providers.Object;
 
 namespace Okta.Sdk.Abstractions.UnitTests
@@ -88,35 +88,117 @@ fruits:
         [Fact]
         public void ParseConfigurationObject()
         {
-            var configurationObject = new
+            // anonymous type object
+            var anonymousTypeSet = new
             {
-                connectionTimeout = 99,
+                connectionTimeout = 45,
                 disablehttpscheck = true,
                 token = "tokentokentokentokentokentokentoken",
                 oktaDomain = "https://oktadomain.okta.com",
                 proxy = new
                 {
-                    port = 9999,
+                    port = 8080,
                     host = "https://proxyHost",
                     username = "user",
                     password = "pass",
                 },
             };
 
+            // strongly typed object with all properties set to defaults
+            var typedEmpty = new OktaClientConfiguration();
+
+            // strongly typed object with partially set properties for "okta:client" branch
+            var typedPartiallySetClient = new OktaClientConfiguration
+            {
+                ConnectionTimeout = 120,
+                Proxy = new ProxyConfiguration
+                {
+                    Port = 8000,
+                    Host = "https://proxyHostClient",
+                    Username = "user",
+                    Password = "pass",
+                },
+            };
+
+            // strongly typed object with partially set properties for "okta:testing" branch
+            var typedPartiallySetTesting = new OktaClientConfiguration
+            {
+                ConnectionTimeout = 999,
+                DisableHttpsCheck = false,
+                Proxy = new ProxyConfiguration
+                {
+                    Port = 9999,
+                    Host = "https://proxyHostTesting",
+                    Username = "testuser",
+                    Password = "testpass",
+                },
+            };
+
             var configuration = new ConfigurationBuilder()
-              .AddObject(configurationObject, root: "okta:client")
-              .AddObject(configurationObject, root: "okta:testing")
-              .AddObject(configurationObject)
+              .AddObject(anonymousTypeSet, root: "okta:client")
+              .AddObject(typedEmpty, root: "okta:client")
+              .AddObject(typedPartiallySetClient, root: "okta:client")
+              .AddObject(null, root: "okta:client")
+
+              .AddObject(anonymousTypeSet, root: "okta:testing")
+              .AddObject(typedEmpty, root: "okta:testing")
+              .AddObject(typedPartiallySetTesting, root: "okta:testing")
+              .AddObject(null, root: "okta:testing")
+
+              .AddObject(null)
+              .AddObject(typedEmpty)
+              .AddObject(anonymousTypeSet)
+
               .Build();
 
+            // properties for the okta:client branch
             OktaClientConfiguration compiledConfig = new OktaClientConfiguration();
             configuration.GetSection("okta").GetSection("client").Bind(compiledConfig);
 
-            compiledConfig.ConnectionTimeout.Should().Be(99);
-            compiledConfig.DisableHttpsCheck.Should().Be(true);
+            compiledConfig.ConnectionTimeout.Should().Be(120);
+            compiledConfig.DisableHttpsCheck.Should().BeFalse();
+            compiledConfig.Token.Should().Be("tokentokentokentokentokentokentoken");
+            compiledConfig.OktaDomain.Should().Be("https://oktadomain.okta.com");
+            compiledConfig.Proxy.Port.Should().Be(8000);
+            compiledConfig.Proxy.Host.Should().Be("https://proxyHostClient");
+            compiledConfig.Proxy.Username.Should().Be("user");
+            compiledConfig.Proxy.Password.Should().Be("pass");
+
+            // properties for the okta:testing branch
+            compiledConfig = new OktaClientConfiguration();
+            configuration.GetSection("okta").GetSection("testing").Bind(compiledConfig);
+
+            compiledConfig.ConnectionTimeout.Should().Be(999);
+            compiledConfig.DisableHttpsCheck.Should().BeFalse();
             compiledConfig.Token.Should().Be("tokentokentokentokentokentokentoken");
             compiledConfig.OktaDomain.Should().Be("https://oktadomain.okta.com");
             compiledConfig.Proxy.Port.Should().Be(9999);
+            compiledConfig.Proxy.Host.Should().Be("https://proxyHostTesting");
+            compiledConfig.Proxy.Username.Should().Be("testuser");
+            compiledConfig.Proxy.Password.Should().Be("testpass");
+
+            // properties for the okta:client (lowest priority), then okta:testing, then root (highest priority)
+            compiledConfig = new OktaClientConfiguration { Token = "productiontoken", };
+            configuration.Bind(compiledConfig);
+
+            compiledConfig.ConnectionTimeout.Should().Be(45);
+            compiledConfig.DisableHttpsCheck.Should().BeTrue();
+            compiledConfig.Token.Should().Be("tokentokentokentokentokentokentoken");
+            compiledConfig.OktaDomain.Should().Be("https://oktadomain.okta.com");
+            compiledConfig.Proxy.Port.Should().Be(8080);
+            compiledConfig.Proxy.Host.Should().Be("https://proxyHost");
+            compiledConfig.Proxy.Username.Should().Be("user");
+            compiledConfig.Proxy.Password.Should().Be("pass");
+
+            configuration.GetSection("okta").GetSection("client").Bind(compiledConfig);
+            configuration.GetSection("okta").GetSection("testing").Bind(compiledConfig);
+            configuration.Bind(compiledConfig);
+
+            compiledConfig.ConnectionTimeout.Should().Be(45);
+            compiledConfig.DisableHttpsCheck.Should().BeTrue();
+            compiledConfig.Token.Should().Be("tokentokentokentokentokentokentoken");
+            compiledConfig.OktaDomain.Should().Be("https://oktadomain.okta.com");
+            compiledConfig.Proxy.Port.Should().Be(8080);
             compiledConfig.Proxy.Host.Should().Be("https://proxyHost");
             compiledConfig.Proxy.Username.Should().Be("user");
             compiledConfig.Proxy.Password.Should().Be("pass");

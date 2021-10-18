@@ -5,6 +5,7 @@
 
 using System;
 using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace Okta.Sdk.Abstractions.Configuration.Providers.Object
@@ -31,17 +32,31 @@ namespace Okta.Sdk.Abstractions.Configuration.Providers.Object
                 throw new ArgumentNullException(nameof(IConfigurationBuilder));
             }
 
+            var configContainer = @object ?? new { };
             JObject jsonObject;
 
             if (string.IsNullOrWhiteSpace(root))
             {
-                jsonObject = JObject.FromObject(@object);
+                jsonObject = JObject.FromObject(
+                    configContainer,
+                    new JsonSerializer
+                    {
+                        NullValueHandling = NullValueHandling.Ignore,
+                    });
             }
             else
             {
                 jsonObject = new JObject
                 {
-                    { root, JToken.FromObject(@object) },
+                    {
+                        root,
+                        JToken.FromObject(
+                            configContainer,
+                            new JsonSerializer
+                            {
+                                NullValueHandling = NullValueHandling.Ignore,
+                            })
+                    },
                 };
             }
 
