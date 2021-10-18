@@ -89,7 +89,7 @@ fruits:
         public void ParseConfigurationObject()
         {
             // anonymous type object
-            var anonymousFilled = new
+            var anonymousTypeSet = new
             {
                 connectionTimeout = 45,
                 disablehttpscheck = true,
@@ -135,19 +135,19 @@ fruits:
             };
 
             var configuration = new ConfigurationBuilder()
-              .AddObject(anonymousFilled, root: "okta:client")
+              .AddObject(anonymousTypeSet, root: "okta:client")
               .AddObject(typedEmpty, root: "okta:client")
               .AddObject(typedPartiallySetClient, root: "okta:client")
               .AddObject(null, root: "okta:client")
 
-              .AddObject(anonymousFilled, root: "okta:testing")
+              .AddObject(anonymousTypeSet, root: "okta:testing")
               .AddObject(typedEmpty, root: "okta:testing")
               .AddObject(typedPartiallySetTesting, root: "okta:testing")
               .AddObject(null, root: "okta:testing")
 
               .AddObject(null)
               .AddObject(typedEmpty)
-              .AddObject(anonymousFilled)
+              .AddObject(anonymousTypeSet)
 
               .Build();
 
