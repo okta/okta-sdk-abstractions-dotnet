@@ -1,6 +1,12 @@
 # Changelog
 Running changelog of releases since `2.0.1`
 
+## v4.0.3
+
+### Bug Fixes
+
+- Fix for [Okta.Sdk issue #526](https://github.com/okta/okta-sdk-dotnet/issues/526) *Unable to create OktaClient on linux build server after 5.2.1 upgrade*.
+
 ## v4.0.2
 
 ### Bug Fixes

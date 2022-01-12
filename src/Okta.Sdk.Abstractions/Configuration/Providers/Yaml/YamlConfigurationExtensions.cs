@@ -38,11 +38,6 @@ namespace Okta.Sdk.Abstractions.Configuration.Providers.Yaml
                 throw new ArgumentNullException(nameof(builder));
             }
 
-            if (string.IsNullOrEmpty(path))
-            {
-                throw new ArgumentException(nameof(path));
-            }
-
             var yamlConfigurationSource = new YamlConfigurationSource
             {
                 Path = path,
