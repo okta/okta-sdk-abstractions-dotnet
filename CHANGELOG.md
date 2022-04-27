@@ -1,6 +1,12 @@
 # Changelog
 Running changelog of releases since `2.0.1`
 
+## v4.0.4
+
+### Updates
+
+- Update `Microsoft.Extensions.Configuration` packages to v6
+
 ## v4.0.3
 
 ### Bug Fixes
