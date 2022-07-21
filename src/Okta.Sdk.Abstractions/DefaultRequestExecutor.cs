@@ -49,6 +49,10 @@ namespace Okta.Sdk.Abstractions
         private static void ApplyDefaultClientSettings(HttpClient client, string oktaDomain, OktaClientConfiguration configuration)
         {
             client.BaseAddress = new Uri(oktaDomain, UriKind.Absolute);
+            if (!string.IsNullOrEmpty(configuration.Token))
+            {
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("SSWS", configuration.Token);
+            }
         }
 
         private string EnsureRelativeUrl(string uri)
