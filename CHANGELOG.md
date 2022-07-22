@@ -1,6 +1,12 @@
 # Changelog
 Running changelog of releases since `2.0.1`
 
+## v4.0.5
+
+### Bug Fixes
+
+-  Set default authorization header if token is specified in configuration
+
 ## v4.0.4
 
 ### Updates
