@@ -5,7 +5,7 @@ Running changelog of releases since `2.0.1`
 
 ### Updates
 
-- Update `Newtonsoft.Json` packages to v13.0.1
+- Update `Newtonsoft.Json` package to v13.0.1
 
 ## v4.0.5
 
