@@ -32,3 +32,12 @@ workflows:
   "Circle CI Build":
     jobs:
       - build
+  # See OKTA-624835
+  semgrep:
+    jobs:
+      - general-platform-helpers/job-semgrep-prepare:
+          name: semgrep-prepare
+      - general-platform-helpers/job-semgrep-scan:
+          name: "Scan with Semgrep"
+          requires:
+            - semgrep-prepare
