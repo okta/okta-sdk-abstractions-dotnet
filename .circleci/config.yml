@@ -58,8 +58,7 @@ workflows:
       - snyk-scan:
           name: execute-snyk
           requires:
-            - prepare-snyk
-            
+            - prepare-snyk            
   "Semgrep":
     jobs:
       - general-platform-helpers/job-semgrep-prepare:
