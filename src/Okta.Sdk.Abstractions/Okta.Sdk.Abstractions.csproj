@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
-    <Version>4.0.6</Version>
+    <Version>4.0.7</Version>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -28,6 +28,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
     <PackageReference Include="System.Interactive.Async" Version="5.0.0" />
+    <PackageReference Include="System.Text.Json" Version="6.0.10" />
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
     <PackageReference Include="YamlDotNet" Version="11.2.1" />
     <AdditionalFiles Include="..\stylecop.json" />
