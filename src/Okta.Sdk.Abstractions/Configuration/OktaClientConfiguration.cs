@@ -34,7 +34,9 @@ namespace Okta.Sdk.Abstractions.Configuration
         /// The Okta Organization URL to use.
         /// </value>
         /// <remarks>
-        /// This URL is typically in the form <c>https://dev-12345.oktapreview.com</c>. If your Okta domain includes <c>-admin</c>, remove it.
+        /// This URL is typically in the form <c>https://dev-12345.oktapreview.com</c>, <c>https://dev-12345.okta.com</c>,
+        /// <c>https://dev-12345.trex-govcloud.com</c>, <c>https://dev-12345.okta-gov.com</c>, <c>https://dev-12345.okta.mil</c>,
+        /// or <c>https://dev-12345.okta-miltest.com</c>. If your Okta domain includes <c>-admin</c>, remove it.
         /// </remarks>
         public string OktaDomain { get; set; }
 
