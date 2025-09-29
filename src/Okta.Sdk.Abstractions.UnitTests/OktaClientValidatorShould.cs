@@ -41,6 +41,10 @@ namespace Okta.Sdk.Abstractions.UnitTests
         [InlineData("https://foo-admin.okta.com")]
         [InlineData("https://foo-admin.oktapreview.com")]
         [InlineData("https://https://foo-admin.okta-emea.com")]
+        [InlineData("https://foo-admin.trex-govcloud.com")]
+        [InlineData("https://foo-admin.okta-gov.com")]
+        [InlineData("https://foo-admin.okta.mil")]
+        [InlineData("https://foo-admin.okta-miltest.com")]
         public void FailIfOktaDomainContainsAdminKeyword(string oktaDomain)
         {
             var configuration = new OktaClientConfiguration();
