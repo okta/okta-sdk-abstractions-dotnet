@@ -122,14 +122,14 @@ jobs:
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
 workflows:
-  "Malware Scanner":
+  "Circle CI Build & Malware Scans":
     jobs:
       - reversing-labs:
           context:
             - static-analysis
-  "Circle CI Build & Snyk Scan":
-    jobs:
-      - build
+      - build:
+          requires:
+            - reversing-labs
       - snyk-scan:
           name: execute-snyk
           context:
