@@ -3,6 +3,7 @@ version: 2.1
 orbs:
   windows: circleci/windows@5.0
   general-platform-helpers: okta/general-platform-helpers@1.9
+  platform-helpers: okta/platform-helpers@1
   python: circleci/python@2.0.3
   aws-cli: circleci/aws-cli@5.1
 
@@ -11,10 +12,11 @@ orbs:
 jobs:
   reversing-labs:
     docker:
-      - image: mcr.microsoft.com/dotnet/sdk:6.0
+      - image: mcr.microsoft.com/dotnet/sdk:8.0
+    resource_class: large
     steps:
       - run:
-          name: Manual HTTPS checkout (avoid SSH)
+          name: Checkout Source Code
           command: |
             git --version
             rm -rf .git || true
@@ -23,48 +25,53 @@ jobs:
             git fetch --depth=1 origin $CIRCLE_SHA1
             git checkout --force $CIRCLE_SHA1
 
-      - run: dotnet --version
+      - run:
+          name: Verify .NET SDK Installation
+          command: dotnet --version
 
       - run:
-          name: build Binary to scan
-          command: dotnet build ./src/Okta.Sdk.Abstractions.sln
+          name: Build Release Binaries for Security Scan
+          command: |
+            # Build all projects
+            dotnet build ./src/Okta.Sdk.Abstractions/Okta.Sdk.Abstractions.csproj --configuration Release
+            dotnet build ./src/Okta.Sdk.Abstractions.UnitTests/Okta.Sdk.Abstractions.UnitTests.csproj --configuration Release
 
-      # Necessary to Install rl wrapper
       - run:
-          name: Install Python
+          name: Setup Python Virtual Environment
           command: |
             apt-get update
-            apt-get install -y curl python3 python3-pip unzip
-            pip3 install --upgrade pip
+            apt-get install -y curl python3 python3-pip python3-venv unzip
+            python3 -m venv venv
+            source venv/bin/activate
+            pip install --upgrade pip
 
-      # Download the scanner from Okta Security
       - run:
-          name: Download Reverse Labs Scanner
+          name: Download ReversingLabs Scanner
           command: |
             curl https://dso-resources.oktasecurity.com/scanner \
               -H "x-api-key: $DSO_RLSECURE_TOKEN" \
               --output rl_wrapper-0.0.2+35ababa-py3-none-any.whl
 
-      # Install the wrapper that was downloaded
       - run:
-          name: Install RL Wrapper
+          name: Install ReversingLabs Wrapper
           command: |
-            pip3 install ./rl_wrapper-0.0.2+35ababa-py3-none-any.whl
+            source venv/bin/activate
+            pip install ./rl_wrapper-0.0.2+35ababa-py3-none-any.whl
 
-      # Setup the AWS profile
       - aws-cli/setup:
           profile_name: default
           role_arn: $AWS_ARN
           region: us-east-1
 
-      # Get the credentials and save to env
-      - run: >-
-          eval "$(aws configure export-credentials --profile default --format env)" 2> /dev/null
-
-      # Run the wrapper, do not change anything here
       - run:
-          name: Run Reversing Labs Wrapper Scanner
+          name: Configure AWS Credentials
+          command: >-
+            eval "$(aws configure export-credentials --profile default --format env)" 2> /dev/null
+
+      - run:
+          name: Execute ReversingLabs Security Scan
           command: |
+            source venv/bin/activate
             rl-wrapper \
               --artifact ${CIRCLE_WORKING_DIRECTORY/#\~/$HOME} \
               --name $CIRCLE_PROJECT_REPONAME\
@@ -74,14 +81,14 @@ jobs:
               --build-env "circleci" \
               --suppress_output
 
-  build:
+  Build:
     executor:
       name: windows/default
     environment:
       CIRCLE_CI: True
     steps:
       - run:
-          name: Manual HTTPS checkout (avoid SSH)
+          name: Checkout Source Code
           command: |
             git --version
             if (Test-Path .git) { Remove-Item -Recurse -Force .git }
@@ -90,27 +97,19 @@ jobs:
             git fetch --depth=1 origin $env:CIRCLE_SHA1
             git checkout --force $env:CIRCLE_SHA1
       - run:
-          name: "build Okta.Sdk.Abstractions"
-          command: .\build.ps1
-      - persist_to_workspace: # Allows for sharing of build-workspace (containing downloaded dependencies) (optional)
+          name: Build and Test
+          command: .\build.ps1 -Target Test
+      - persist_to_workspace:
           root: ~/project
           paths:
             - src
             - .git
-      - when:
-          condition:
-            equal: [ "<<pipeline.git.branch>>", "master" ]
-          steps:
-            - general-platform-helpers/step-artifacts-prepare-and-upload-windows:
-                files-to-upload: "artifacts"
-                location: "com/okta/devex/okta-sdk-abstractions-dotnet"
   
   snyk-scan:
     docker:
       - image: cimg/python:3.10
-
     steps:
-      - attach_workspace: # Allows for sharing of build-workspace (containing downloaded dependencies) (optional)
+      - attach_workspace:
           at: ~/project
       - general-platform-helpers/step-load-dependencies
       - general-platform-helpers/step-run-snyk-monitor:
@@ -122,17 +121,24 @@ jobs:
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
 workflows:
-  "Circle CI Build & Malware Scans":
+  "Build and Security Scanning":
     jobs:
+      - Build
       - reversing-labs:
           context:
             - static-analysis
-      - build:
+          name: ReversingLabs Binary Scan
           requires:
-            - reversing-labs
+            - Build
       - snyk-scan:
-          name: execute-snyk
+          name: Snyk Dependency Scan
           context:
             - static-analysis
           requires:
-            - build
+            - Build
+      - platform-helpers/job-semgrep-scan:
+          context:
+            - static-analysis
+          name: Semgrep Code Analysis
+          requires:
+            - Build
