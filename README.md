@@ -15,11 +15,11 @@ The Okta Abstractions project contains common modules use across Okta .NET ecosy
 
 This library uses semantic versioning and follows Okta's [library version policy](https://developer.okta.com/code/library-versions/).
 
-:heavy_check_mark: The current stable major version series is: 2.x
+:heavy_check_mark: The current stable major version series is: 4.x
 
 | Version | Status                    |
 | ------- | ------------------------- |
-| 2.x | :heavy_check_mark: Stable |
+| 4.x | :heavy_check_mark: Stable |
 
 The latest release can always be found on the [releases page][github-releases].
 
@@ -52,6 +52,6 @@ We're happy to accept contributions and PRs! Please see the [contribution guide]
 
 [devforum]: https://devforum.okta.com/
 [lang-landing]: https://developer.okta.com/code/dotnet/
-[github-issues]: https://github.com/okta/okta-auth-dotnet/issues
-[github-releases]: https://github.com/okta/okta-auth-dotnet/releases
+[github-issues]: https://github.com/okta/okta-sdk-abstractions-dotnet/issues
+[github-releases]: https://github.com/okta/okta-sdk-abstractions-dotnet/releases
 

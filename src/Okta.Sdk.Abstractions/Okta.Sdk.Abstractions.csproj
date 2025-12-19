@@ -8,9 +8,9 @@
   <PropertyGroup>
     <Description>Interfaces and shared code for Okta's SDKs.</Description>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\Okta.Sdk.Abstractions.xml</DocumentationFile>
-    <RepositoryUrl>https://github.com/okta/okta-auth-dotnet</RepositoryUrl>
-    <PackageProjectUrl>https://github.com/okta/okta-auth-dotnet</PackageProjectUrl>
-    <PackageLicenseUrl>https://github.com/okta/okta-auth-dotnet/blob/master/LICENSE</PackageLicenseUrl>
+    <RepositoryUrl>https://github.com/okta/okta-sdk-abstractions-dotnet</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/okta/okta-sdk-abstractions-dotnet</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/okta/okta-sdk-abstractions-dotnet/blob/master/LICENSE</PackageLicenseUrl>
     <Authors>Okta, Inc.</Authors>
     <PackageTags>okta api authentication identity management</PackageTags>
     <PackageIconUrl>https://raw.githubusercontent.com/okta/okta-sdk-dotnet/master/icon.png</PackageIconUrl>
@@ -35,8 +35,8 @@
   
   <PropertyGroup>
     <CodeAnalysisRuleSet>..\OktaSdk.ruleset</CodeAnalysisRuleSet>
-    <AssemblyVersion>4.0.6.0</AssemblyVersion>
-    <FileVersion>4.0.6.0</FileVersion>
+    <AssemblyVersion>4.0.7.0</AssemblyVersion>
+    <FileVersion>4.0.7.0</FileVersion>
   </PropertyGroup>
   
 </Project>
