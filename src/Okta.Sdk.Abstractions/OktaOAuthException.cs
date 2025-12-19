@@ -33,7 +33,7 @@ namespace Okta.Sdk.Abstractions
         /// <value>
         /// The HTTP status code.
         /// </value>
-        public int StatusCode { get; }
+        public new int StatusCode { get; }
 
         /// <summary>
         /// Gets the error code from the <see cref="Error"/> object.

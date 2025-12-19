@@ -34,7 +34,7 @@ namespace Okta.Sdk.Abstractions
         // Extracts error message from the top level of response object
         private string GetResponseErrorSummary()
         {
-            var sbErrorSumary = new StringBuilder();
+            var errorSummaryBuilder = new StringBuilder();
             var messageObj = this.GetProperty<BaseResource>("messages");
 
             if (messageObj != null)
@@ -45,12 +45,12 @@ namespace Okta.Sdk.Abstractions
                 {
                     foreach (var message in messages)
                     {
-                        sbErrorSumary.AppendLine(message.GetProperty<string>("message"));
+                        errorSummaryBuilder.AppendLine(message.GetProperty<string>("message"));
                     }
                 }
             }
 
-            return sbErrorSumary.ToString();
+            return errorSummaryBuilder.ToString();
         }
 
         /*
@@ -118,8 +118,8 @@ namespace Okta.Sdk.Abstractions
         */
         private string GetFormValidationErrorSummary()
         {
-            var jToken = JToken.Parse(GetRaw());
-            var errorMessages = jToken
+            var parsedToken = JToken.Parse(GetRaw());
+            var errorMessages = parsedToken
                                     .SelectTokens("$.remediation.value[*].value[*].form.value[*].messages.value[*].message")
                                     .Select(t => t.ToString());
             return string.Join(Environment.NewLine, errorMessages);

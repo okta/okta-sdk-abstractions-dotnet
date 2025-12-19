@@ -45,7 +45,6 @@ namespace Okta.Sdk.Abstractions
         /// <returns>The encoded value.</returns>
         public static string EncodeToBase64Url(byte[] bytes)
         {
-
             if (bytes == null)
             {
                 return string.Empty;
