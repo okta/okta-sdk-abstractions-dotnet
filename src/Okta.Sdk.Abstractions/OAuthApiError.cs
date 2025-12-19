@@ -18,6 +18,4 @@ namespace Okta.Sdk.Abstractions
         /// <inheritdoc/>
         public string ErrorDescription => GetStringProperty("error_description");
     }
-
-    
 }

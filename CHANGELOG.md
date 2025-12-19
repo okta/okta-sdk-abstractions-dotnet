@@ -1,6 +1,18 @@
 # Changelog
 Running changelog of releases since `2.0.1`
 
+## v4.0.7
+
+### Updates
+
+- Remove unused `System.Interactive.Async` dependency that caused conflicts with Entity Framework Core async LINQ methods
+- Update `Microsoft.Extensions.*` packages to v10.0.1
+- Update `System.Text.Json` to v10.0.1
+- Update `Newtonsoft.Json` to v13.0.4
+- Update `YamlDotNet` to v16.3.0
+- Fix StyleCop warnings (SA1305, SA1505, SA1507, SA1508, SA1024, SA1028, SA1638)
+- Fix CS0108 warnings for `StatusCode` property hiding
+
 ## v4.0.6
 
 ### Updates

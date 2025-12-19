@@ -10,7 +10,7 @@ namespace Okta.Sdk.Abstractions.Configuration.Providers.Object
     /// <summary>
     /// Object configuration provider
     /// </summary>
-    public class ObjectConfigurationProvider: JsonStreamConfigurationProvider
+    public class ObjectConfigurationProvider : JsonStreamConfigurationProvider
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ObjectConfigurationProvider"/> class.
