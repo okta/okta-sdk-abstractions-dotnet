@@ -150,5 +150,66 @@ namespace Okta.Sdk.Abstractions.UnitTests.Internal
                 return new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("{}", Encoding.UTF8, "application/json") };
             }
         }
+
+        [Theory]
+        [InlineData("https://test.okta.com//attacker.example.com/api/v1/users")]
+        [InlineData("https://test.okta.com///attacker.example.com/api/v1/users")]
+        [InlineData("\\/attacker.example.com/api/v1/users")]
+        [InlineData("/\\/attacker.example.com/api/v1/users")]
+        [InlineData(" //attacker.example.com/api/v1/users")]
+        [InlineData("\t//attacker.example.com/api/v1/users")]
+        [InlineData("https://attacker.example.com/api/v1/users")]
+        [InlineData("http:\\\\attacker.example.com/api/v1/users")]
+        public async Task RejectRequestUrisThatResolveToAnotherOrigin(string href)
+        {
+            var handler = new RecordingHandler();
+            var executor = CreateExecutor(handler);
+
+            Func<Task> get = () => executor.GetAsync(href, null, CancellationToken.None);
+            Func<Task> post = () => executor.PostAsync(href, null, "{}", CancellationToken.None);
+            Func<Task> put = () => executor.PutAsync(href, null, "{}", CancellationToken.None);
+            Func<Task> delete = () => executor.DeleteAsync(href, null, CancellationToken.None);
+
+            await get.Should().ThrowAsync<InvalidOperationException>();
+            await post.Should().ThrowAsync<InvalidOperationException>();
+            await put.Should().ThrowAsync<InvalidOperationException>();
+            await delete.Should().ThrowAsync<InvalidOperationException>();
+            handler.Requests.Should().BeEmpty();
+        }
+
+        [Theory]
+        [InlineData("/api/v1/users", "https://test.okta.com/api/v1/users")]
+        [InlineData("api/v1/users", "https://test.okta.com/api/v1/users")]
+        [InlineData("//api/v1/users", "https://test.okta.com/api/v1/users")]
+        [InlineData("https://test.okta.com/api/v1/users?after=abc&limit=2", "https://test.okta.com/api/v1/users?after=abc&limit=2")]
+        [InlineData("https://TEST.okta.com/api/v1/users", "https://test.okta.com/api/v1/users")]
+        [InlineData("https://test.okta.com.attacker.example.com/api/v1/users", "https://test.okta.com/.attacker.example.com/api/v1/users")]
+        public async Task SendSameOriginRequestUrisToTheOktaDomain(string href, string expectedUri)
+        {
+            var handler = new RecordingHandler();
+            var executor = CreateExecutor(handler);
+
+            await executor.GetAsync(href, null, CancellationToken.None);
+
+            handler.Requests.Should().ContainSingle();
+            handler.Requests[0].RequestUri.Should().Be(new Uri(expectedUri));
+        }
+
+        private static DefaultRequestExecutor CreateExecutor(HttpMessageHandler handler)
+        {
+            var oktaConfig = new OktaClientConfiguration { Token = "abcd1234-fake-token", OktaDomain = OktaDomain };
+            return new DefaultRequestExecutor(oktaConfig, new HttpClient(handler), NullLogger.Instance);
+        }
+
+        private sealed class RecordingHandler : HttpMessageHandler
+        {
+            public List<HttpRequestMessage> Requests { get; } = new List<HttpRequestMessage>();
+
+            protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+            {
+                Requests.Add(request);
+                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("{}") });
+            }
+        }
     }
 }
