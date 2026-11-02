@@ -22,6 +22,9 @@ namespace Okta.Sdk.Abstractions
     /// </summary>
     public sealed class DefaultRequestExecutor : IRequestExecutor
     {
+        private const string AuthorizationSchemeHeader = "Authorization-Scheme";
+        private const string AuthorizationValueHeader = "Authorization-Value";
+
         private readonly string _oktaDomain;
         private readonly HttpClient _httpClient;
         private readonly ILogger _logger;
@@ -127,17 +130,27 @@ namespace Okta.Sdk.Abstractions
             foreach (var header in headers)
             {
                 // Content-Type is set during the content creation. This is a limitation of .NET, that doesn't allow to set Content-Type as a request header.
-                if (!string.Equals(header.Key, "Content-Type", StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(header.Key, "Content-Type", StringComparison.OrdinalIgnoreCase))
                 {
-                    request.Headers.Add(header.Key, header.Value);
+                    continue;
                 }
 
-                // Authorization header is set with special via headers.Authorization.
-                if (string.Equals(header.Key, "Authorization-Scheme", StringComparison.OrdinalIgnoreCase))
+                // The raw credential is never forwarded as a header of its own; it's only used to build the Authorization header below.
+                if (string.Equals(header.Key, AuthorizationValueHeader, StringComparison.OrdinalIgnoreCase))
                 {
-                    var authorizationHeaderValue = headers.FirstOrDefault(x => x.Key == "Authorization-Value").Value;
-                    _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(header.Value, authorizationHeaderValue);
+                    continue;
                 }
+
+                // Authorization is set on this request only. Never mutate HttpClient.DefaultRequestHeaders here,
+                // since the HttpClient is shared by the parent client and every scoped client.
+                if (string.Equals(header.Key, AuthorizationSchemeHeader, StringComparison.OrdinalIgnoreCase))
+                {
+                    var authorizationHeaderValue = headers.FirstOrDefault(x => string.Equals(x.Key, AuthorizationValueHeader, StringComparison.OrdinalIgnoreCase)).Value;
+                    request.Headers.Authorization = new AuthenticationHeaderValue(header.Value, authorizationHeaderValue);
+                    continue;
+                }
+
+                request.Headers.Add(header.Key, header.Value);
             }
         }
 
