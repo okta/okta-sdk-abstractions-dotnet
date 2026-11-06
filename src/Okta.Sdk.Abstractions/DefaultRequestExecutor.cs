@@ -65,18 +65,41 @@ namespace Okta.Sdk.Abstractions
                 throw new ArgumentException("The request URI was empty.");
             }
 
-            if (uri.StartsWith(_oktaDomain))
+            string path;
+
+            if (uri.StartsWith(_oktaDomain, StringComparison.OrdinalIgnoreCase))
             {
-                return uri.Replace(_oktaDomain, string.Empty);
+                path = uri.Substring(_oktaDomain.Length);
+            }
+            else if (uri.Contains("://"))
+            {
+                throw new InvalidOperationException($"The client is configured to connect to {_oktaDomain}, but this request URI does not match: {uri}");
+            }
+            else
+            {
+                path = uri.TrimStart('/');
             }
 
-            if (uri.Contains("://"))
+            // Network-path references (e.g. "//host/path", "\\/host/path") are relative URIs that inherit only
+            // the scheme of the base address, so they would send the request (and the SSWS token) to another host.
+            // Resolve the path exactly as HttpClient will and make sure it stays on the configured Okta origin.
+            if (!Uri.TryCreate(path, UriKind.Relative, out var relativeUri)
+                || !Uri.TryCreate(_httpClient.BaseAddress, relativeUri, out var resolvedUri)
+                || !IsSameOrigin(_httpClient.BaseAddress, resolvedUri))
             {
-                throw new InvalidOperationException($"The client is configured to connect to {_oktaDomain}, but this request URI does not match: ${uri}");
+                throw new InvalidOperationException($"The client is configured to connect to {_oktaDomain}, but this request URI does not match: {uri}");
             }
 
-            return uri.TrimStart('/');
+            return path;
         }
+
+        private static bool IsSameOrigin(Uri baseAddress, Uri resolvedUri)
+            => Uri.Compare(
+                baseAddress,
+                resolvedUri,
+                UriComponents.SchemeAndServer,
+                UriFormat.Unescaped,
+                StringComparison.OrdinalIgnoreCase) == 0;
 
         private string GetContentType(IEnumerable<KeyValuePair<string, string>> headers)
         {
