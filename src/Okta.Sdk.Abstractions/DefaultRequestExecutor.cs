@@ -124,6 +124,7 @@ namespace Okta.Sdk.Abstractions
             CancellationToken cancellationToken)
         {
             // Use the client's own API token unless a scoped Authorization was already set for this request.
+            // The shared AuthenticationHeaderValue is only ever read, never mutated, so it is safe to reuse across concurrent requests.
             if (request.Headers.Authorization == null && _defaultAuthorization != null)
             {
                 request.Headers.Authorization = _defaultAuthorization;

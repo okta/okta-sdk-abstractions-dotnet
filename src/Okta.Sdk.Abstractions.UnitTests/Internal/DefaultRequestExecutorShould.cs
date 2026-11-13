@@ -57,6 +57,20 @@ namespace Okta.Sdk.Abstractions.UnitTests.Internal
         }
 
         [Fact]
+        public async Task LeaveCallerProvidedDefaultAuthorizationInPlaceWhenNoTokenIsConfigured()
+        {
+            var handler = new CapturingHandler();
+            var httpClient = new HttpClient(handler);
+            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", "caller-token");
+            var executor = new DefaultRequestExecutor(new OktaClientConfiguration { OktaDomain = OktaDomain }, httpClient, NullLogger.Instance);
+
+            await executor.GetAsync("/api/v1/users", null, CancellationToken.None);
+
+            httpClient.DefaultRequestHeaders.Authorization.ToString().Should().Be("Bearer caller-token");
+            handler.Requests.Single().Authorization.Should().Be("Bearer caller-token");
+        }
+
+        [Fact]
         public async Task KeepTokenAndOrgIsolatedBetweenClientsSharingAnHttpClient()
         {
             var handler = new CapturingHandler();
