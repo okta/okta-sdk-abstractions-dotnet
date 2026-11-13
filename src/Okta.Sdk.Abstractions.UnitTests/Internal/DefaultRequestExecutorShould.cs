@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,17 +20,119 @@ namespace Okta.Sdk.Abstractions.UnitTests.Internal
         private const string OktaDomain = "https://test.okta.com";
 
         [Fact]
-        public void SetHttpClientDefaultRequestAuthorizationHeader()
+        public void NotStoreTokenOrOktaDomainOnTheHttpClient()
         {
-            var testToken = "abcd1234-fake-token";
             var httpClient = new HttpClient();
-            var oktaConfig = new OktaClientConfiguration { Token = testToken, OktaDomain = OktaDomain };
+            var oktaConfig = new OktaClientConfiguration { Token = "abcd1234-fake-token", OktaDomain = OktaDomain };
             _ = new DefaultRequestExecutor(oktaConfig, httpClient, null);
 
-            httpClient.DefaultRequestHeaders.Should().NotBeNull();
-            httpClient.DefaultRequestHeaders.Authorization.Should().NotBeNull();
-            httpClient.DefaultRequestHeaders.Authorization.Scheme.Should().Be("SSWS");
-            httpClient.DefaultRequestHeaders.Authorization.Parameter.Should().Be(testToken);
+            httpClient.DefaultRequestHeaders.Authorization.Should().BeNull();
+            httpClient.BaseAddress.Should().BeNull();
+        }
+
+        [Fact]
+        public async Task SetSswsAuthorizationOnEachRequest()
+        {
+            var handler = new CapturingHandler();
+            var executor = new DefaultRequestExecutor(new OktaClientConfiguration { Token = "abcd1234-fake-token", OktaDomain = OktaDomain }, new HttpClient(handler), NullLogger.Instance);
+
+            await executor.GetAsync("/api/v1/users", null, CancellationToken.None);
+            await executor.PostAsync("/api/v1/users", null, "{}", CancellationToken.None);
+            await executor.PutAsync("/api/v1/users/123", null, "{}", CancellationToken.None);
+            await executor.DeleteAsync("/api/v1/users/123", null, CancellationToken.None);
+
+            handler.Requests.Should().HaveCount(4);
+            handler.Requests.Select(r => r.Authorization).Should().OnlyContain(a => a == "SSWS abcd1234-fake-token");
+        }
+
+        [Fact]
+        public async Task NotSendAuthorizationWhenNoTokenIsConfigured()
+        {
+            var handler = new CapturingHandler();
+            var executor = new DefaultRequestExecutor(new OktaClientConfiguration { OktaDomain = OktaDomain }, new HttpClient(handler), NullLogger.Instance);
+
+            await executor.GetAsync("/api/v1/users", null, CancellationToken.None);
+
+            handler.Requests.Single().Authorization.Should().BeNull();
+        }
+
+        [Fact]
+        public async Task KeepTokenAndOrgIsolatedBetweenClientsSharingAnHttpClient()
+        {
+            var handler = new CapturingHandler();
+            var sharedHttpClient = new HttpClient(handler);
+            var executorA = new DefaultRequestExecutor(new OktaClientConfiguration { Token = "token-a", OktaDomain = "https://org-a.okta.com" }, sharedHttpClient, NullLogger.Instance);
+            var executorB = new DefaultRequestExecutor(new OktaClientConfiguration { Token = "token-b", OktaDomain = "https://org-b.okta.com" }, sharedHttpClient, NullLogger.Instance);
+
+            await executorA.GetAsync("/api/v1/users", null, CancellationToken.None);
+            await executorB.GetAsync("/api/v1/users", null, CancellationToken.None);
+            await executorA.PostAsync("/api/v1/users", null, "{}", CancellationToken.None);
+
+            handler.Requests.Select(r => $"{r.Uri} {r.Authorization}").Should().Equal(
+                "https://org-a.okta.com/api/v1/users SSWS token-a",
+                "https://org-b.okta.com/api/v1/users SSWS token-b",
+                "https://org-a.okta.com/api/v1/users SSWS token-a");
+        }
+
+        [Fact]
+        public async Task KeepConcurrentClientsSharingAnHttpClientIsolated()
+        {
+            var handler = new CapturingHandler(delay: TimeSpan.FromMilliseconds(5));
+            var sharedHttpClient = new HttpClient(handler);
+            var executorA = new DefaultRequestExecutor(new OktaClientConfiguration { Token = "token-a", OktaDomain = "https://org-a.okta.com" }, sharedHttpClient, NullLogger.Instance);
+            var executorB = new DefaultRequestExecutor(new OktaClientConfiguration { Token = "token-b", OktaDomain = "https://org-b.okta.com" }, sharedHttpClient, NullLogger.Instance);
+
+            using (var gate = new ManualResetEventSlim(false))
+            {
+                var tasks = Enumerable.Range(0, 200).SelectMany(i => new[]
+                {
+                    Task.Run(() => { gate.Wait(); return executorA.GetAsync("/api/v1/users", null, CancellationToken.None); }),
+                    Task.Run(() => { gate.Wait(); return executorB.GetAsync("/api/v1/users", null, CancellationToken.None); }),
+                }).ToList();
+                gate.Set();
+                await Task.WhenAll(tasks);
+            }
+
+            handler.Requests.Should().HaveCount(400);
+            foreach (var request in handler.Requests)
+            {
+                var expected = request.Uri.Host == "org-a.okta.com" ? "SSWS token-a" : "SSWS token-b";
+                request.Authorization.Should().Be(expected);
+            }
+        }
+
+        [Fact]
+        public async Task AllowCreatingAClientOnAnHttpClientThatAlreadySentRequests()
+        {
+            var handler = new CapturingHandler();
+            var sharedHttpClient = new HttpClient(handler);
+            var executorA = new DefaultRequestExecutor(new OktaClientConfiguration { Token = "token-a", OktaDomain = "https://org-a.okta.com" }, sharedHttpClient, NullLogger.Instance);
+            await executorA.GetAsync("/api/v1/users", null, CancellationToken.None);
+
+            var executorB = new DefaultRequestExecutor(new OktaClientConfiguration { Token = "token-b", OktaDomain = "https://org-b.okta.com" }, sharedHttpClient, NullLogger.Instance);
+            await executorB.GetAsync("/api/v1/users", null, CancellationToken.None);
+
+            handler.Requests.Select(r => $"{r.Uri} {r.Authorization}").Should().Equal(
+                "https://org-a.okta.com/api/v1/users SSWS token-a",
+                "https://org-b.okta.com/api/v1/users SSWS token-b");
+        }
+
+        [Fact]
+        public async Task IgnoreBaseAddressAndDefaultAuthorizationAlreadySetOnTheHttpClient()
+        {
+            var handler = new CapturingHandler();
+            var httpClient = new HttpClient(handler)
+            {
+                BaseAddress = new Uri("https://attacker.example.com/"),
+            };
+            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("SSWS", "other-token");
+            var executor = new DefaultRequestExecutor(new OktaClientConfiguration { Token = "admin-token", OktaDomain = OktaDomain }, httpClient, NullLogger.Instance);
+
+            await executor.GetAsync("/api/v1/users", null, CancellationToken.None);
+
+            var sent = handler.Requests.Single();
+            sent.Uri.Should().Be(new Uri("https://test.okta.com/api/v1/users"));
+            sent.Authorization.Should().Be("SSWS admin-token");
         }
 
         [Fact]
@@ -41,8 +144,7 @@ namespace Okta.Sdk.Abstractions.UnitTests.Internal
 
             await executor.GetAsync("/api/v1/users/me", ScopedHeaders("user-token-a"), CancellationToken.None);
 
-            httpClient.DefaultRequestHeaders.Authorization.Scheme.Should().Be("SSWS");
-            httpClient.DefaultRequestHeaders.Authorization.Parameter.Should().Be("admin-token");
+            httpClient.DefaultRequestHeaders.Authorization.Should().BeNull();
 
             var sent = handler.Requests.Single();
             sent.Authorization.Should().Be("SSWS user-token-a");
@@ -114,6 +216,8 @@ namespace Okta.Sdk.Abstractions.UnitTests.Internal
 
         private sealed class CapturedRequest
         {
+            public Uri Uri { get; set; }
+
             public string Query { get; set; }
 
             public string Authorization { get; set; }
@@ -121,7 +225,7 @@ namespace Okta.Sdk.Abstractions.UnitTests.Internal
             public IList<string> HeaderNames { get; set; }
         }
 
-        // Records the request exactly as HttpClient sends it (i.e. with DefaultRequestHeaders merged in).
+        // Records the request exactly as HttpClient sends it (i.e. with any DefaultRequestHeaders merged in).
         private sealed class CapturingHandler : HttpMessageHandler
         {
             private readonly TimeSpan _delay;
@@ -142,6 +246,7 @@ namespace Okta.Sdk.Abstractions.UnitTests.Internal
 
                 Requests.Enqueue(new CapturedRequest
                 {
+                    Uri = request.RequestUri,
                     Query = request.RequestUri.Query,
                     Authorization = request.Headers.Authorization?.ToString(),
                     HeaderNames = request.Headers.Select(h => h.Key).ToList(),
