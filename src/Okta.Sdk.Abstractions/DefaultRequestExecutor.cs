@@ -26,6 +26,8 @@ namespace Okta.Sdk.Abstractions
         private const string AuthorizationValueHeader = "Authorization-Value";
 
         private readonly string _oktaDomain;
+        private readonly Uri _baseAddress;
+        private readonly AuthenticationHeaderValue _defaultAuthorization;
         private readonly HttpClient _httpClient;
         private readonly ILogger _logger;
 
@@ -46,19 +48,17 @@ namespace Okta.Sdk.Abstractions
             _logger = logger;
             _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
 
-            ApplyDefaultClientSettings(_httpClient, _oktaDomain, configuration);
-        }
-
-        private static void ApplyDefaultClientSettings(HttpClient client, string oktaDomain, OktaClientConfiguration configuration)
-        {
-            client.BaseAddress = new Uri(oktaDomain, UriKind.Absolute);
+            // The HttpClient may be shared with other executors (e.g. several clients for different orgs or tokens
+            // using one HttpClient), so the Okta domain and API token are kept here and applied to each request.
+            // Never store them on HttpClient.BaseAddress or HttpClient.DefaultRequestHeaders.
+            _baseAddress = new Uri(_oktaDomain, UriKind.Absolute);
             if (!string.IsNullOrEmpty(configuration.Token))
             {
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("SSWS", configuration.Token);
+                _defaultAuthorization = new AuthenticationHeaderValue("SSWS", configuration.Token);
             }
         }
 
-        private string EnsureRelativeUrl(string uri)
+        private Uri ResolveRequestUri(string uri)
         {
             if (string.IsNullOrEmpty(uri))
             {
@@ -82,15 +82,16 @@ namespace Okta.Sdk.Abstractions
 
             // Network-path references (e.g. "//host/path", "\\/host/path") are relative URIs that inherit only
             // the scheme of the base address, so they would send the request (and the SSWS token) to another host.
-            // Resolve the path exactly as HttpClient will and make sure it stays on the configured Okta origin.
+            // Resolve the path against the configured Okta domain and make sure it stays on that origin.
+            // The resolved absolute URI is what gets sent, so HttpClient.BaseAddress is never consulted.
             if (!Uri.TryCreate(path, UriKind.Relative, out var relativeUri)
-                || !Uri.TryCreate(_httpClient.BaseAddress, relativeUri, out var resolvedUri)
-                || !IsSameOrigin(_httpClient.BaseAddress, resolvedUri))
+                || !Uri.TryCreate(_baseAddress, relativeUri, out var resolvedUri)
+                || !IsSameOrigin(_baseAddress, resolvedUri))
             {
                 throw new InvalidOperationException($"The client is configured to connect to {_oktaDomain}, but this request URI does not match: {uri}");
             }
 
-            return path;
+            return resolvedUri;
         }
 
         private static bool IsSameOrigin(Uri baseAddress, Uri resolvedUri)
@@ -122,6 +123,13 @@ namespace Okta.Sdk.Abstractions
             HttpRequestMessage request,
             CancellationToken cancellationToken)
         {
+            // Use the client's own API token unless a scoped Authorization was already set for this request.
+            // The shared AuthenticationHeaderValue is only ever read, never mutated, so it is safe to reuse across concurrent requests.
+            if (request.Headers.Authorization == null && _defaultAuthorization != null)
+            {
+                request.Headers.Authorization = _defaultAuthorization;
+            }
+
             _logger.LogTrace($"{request.Method} {request.RequestUri}");
 
             using (var response = await _httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false))
@@ -164,8 +172,8 @@ namespace Okta.Sdk.Abstractions
                     continue;
                 }
 
-                // Authorization is set on this request only. Never mutate HttpClient.DefaultRequestHeaders here,
-                // since the HttpClient is shared by the parent client and every scoped client.
+                // Authorization is set on this request only. Never mutate HttpClient.DefaultRequestHeaders,
+                // since the HttpClient is shared by the parent client, every scoped client and possibly other clients.
                 if (string.Equals(header.Key, AuthorizationSchemeHeader, StringComparison.OrdinalIgnoreCase))
                 {
                     var authorizationHeaderValue = headers.FirstOrDefault(x => string.Equals(x.Key, AuthorizationValueHeader, StringComparison.OrdinalIgnoreCase)).Value;
@@ -183,9 +191,9 @@ namespace Okta.Sdk.Abstractions
         /// <inheritdoc/>
         public Task<HttpResponse<string>> GetAsync(string href, IEnumerable<KeyValuePair<string, string>> headers, CancellationToken cancellationToken)
         {
-            var path = EnsureRelativeUrl(href);
+            var requestUri = ResolveRequestUri(href);
 
-            var request = new HttpRequestMessage(HttpMethod.Get, new Uri(path, UriKind.Relative));
+            var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
             ApplyHeadersToRequest(request, headers);
 
             return SendAsync(request, cancellationToken);
@@ -194,10 +202,10 @@ namespace Okta.Sdk.Abstractions
         /// <inheritdoc/>
         public Task<HttpResponse<string>> PostAsync(string href, IEnumerable<KeyValuePair<string, string>> headers, string body, CancellationToken cancellationToken)
         {
-            var path = EnsureRelativeUrl(href);
+            var requestUri = ResolveRequestUri(href);
             var contentType = GetContentType(headers);
 
-            var request = new HttpRequestMessage(HttpMethod.Post, new Uri(path, UriKind.Relative));
+            var request = new HttpRequestMessage(HttpMethod.Post, requestUri);
             ApplyHeadersToRequest(request, headers);
 
             request.Content = string.IsNullOrEmpty(body)
@@ -210,10 +218,10 @@ namespace Okta.Sdk.Abstractions
         /// <inheritdoc/>
         public Task<HttpResponse<string>> PutAsync(string href, IEnumerable<KeyValuePair<string, string>> headers, string body, CancellationToken cancellationToken)
         {
-            var path = EnsureRelativeUrl(href);
+            var requestUri = ResolveRequestUri(href);
             var contentType = GetContentType(headers);
 
-            var request = new HttpRequestMessage(HttpMethod.Put, new Uri(path, UriKind.Relative));
+            var request = new HttpRequestMessage(HttpMethod.Put, requestUri);
             ApplyHeadersToRequest(request, headers);
 
             request.Content = string.IsNullOrEmpty(body)
@@ -226,9 +234,9 @@ namespace Okta.Sdk.Abstractions
         /// <inheritdoc/>
         public Task<HttpResponse<string>> DeleteAsync(string href, IEnumerable<KeyValuePair<string, string>> headers, CancellationToken cancellationToken)
         {
-            var path = EnsureRelativeUrl(href);
+            var requestUri = ResolveRequestUri(href);
 
-            var request = new HttpRequestMessage(HttpMethod.Delete, new Uri(path, UriKind.Relative));
+            var request = new HttpRequestMessage(HttpMethod.Delete, requestUri);
             ApplyHeadersToRequest(request, headers);
 
             return SendAsync(request, cancellationToken);

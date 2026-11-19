@@ -1,6 +1,16 @@
 # Changelog
 Running changelog of releases since `2.0.1`
 
+## v4.0.8
+
+### Bug Fixes
+
+- `DefaultRequestExecutor` no longer stores the API token or Okta domain on the `HttpClient` it is given. They are kept on the executor and applied to each request, so several clients can share one `HttpClient` without overwriting each other's token or base address (PSIRT-327, OKTA-1251806)
+
+### Breaking Changes
+
+- The SDK no longer sets `HttpClient.BaseAddress` or `HttpClient.DefaultRequestHeaders.Authorization`. Callers who relied on those values for their own requests must set them themselves
+
 ## v4.0.7
 
 ### Updates
