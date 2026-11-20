@@ -5,6 +5,8 @@ Running changelog of releases since `2.0.1`
 
 ### Bug Fixes
 
+- Scoped credentials are now set on each request instead of on the shared `HttpClient.DefaultRequestHeaders.Authorization`, so a scoped call can no longer replace the parent client's token or leak a token into concurrent requests. The raw `Authorization-Value` header is no longer sent on the wire (OKTA-1275144)
+- Request URIs that would resolve to a host other than the configured Okta domain (e.g. network-path references such as `//attacker.example.com/x`) are now rejected, preventing the API token from being sent off-origin. The Okta domain prefix is also matched case-insensitively (OKTA-1250467)
 - `DefaultRequestExecutor` no longer stores the API token or Okta domain on the `HttpClient` it is given. They are kept on the executor and applied to each request, so several clients can share one `HttpClient` without overwriting each other's token or base address (PSIRT-327, OKTA-1251806)
 
 ### Breaking Changes
